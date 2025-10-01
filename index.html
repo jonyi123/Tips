@@ -1,829 +1,766 @@
-
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Mukja Tip Payout Calculator — Single File (v2)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --blue:#2563eb; --green:#16a34a; --purple:#a855f7;
-      --yellow:#f59e0b; --red:#dc2626; --gray:#6b7280; --bg:#f8fafc;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:#111827}
-    .layout{display:flex;min-height:100vh}
-    .sidebar{width:260px;background:#fff;border-right:1px solid #e5e7eb;padding:16px;position:sticky;top:0;height:100vh}
-    .brand{font-weight:800;font-size:20px;margin-bottom:12px}
-    .small{font-size:12px;color:#6b7280}
-    .nav a{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;margin:6px 0;color:#111827;text-decoration:none}
-    .nav a:hover{background:#f3f4f6}
-    .nav a.active{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-    .nav a.locked{opacity:.45;pointer-events:none}
-    .nav .check{margin-left:auto;color:#16a34a}
-    .main{flex:1;padding:24px}
-    .container{max-width:1100px;margin:0 auto}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.04);margin-bottom:16px}
-    .card .hd{padding:14px 16px;border-bottom:1px solid #e5e7eb}
-    .card .bd{padding:16px}
-    .btn{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border:none;padding:9px 14px;border-radius:12px;font-weight:700;cursor:pointer}
-    .btn[disabled]{opacity:.5;cursor:not-allowed}
-    .btn.ghost{background:transparent;color:#111827;border:1px solid #e5e7eb}
-    .btn.gray{background:#e5e7eb;color:#111827}
-    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
-    .b-blue{background:#dbeafe;color:#1d4ed8}
-    .b-green{background:#dcfce7;color:#166534}
-    .b-purple{background:#ede9fe;color:#6d28d9}
-    .b-yellow{background:#fef3c7;color:#92400e}
-    .b-red{background:#fee2e2;color:#991b1b}
-    .alert{border:1px solid;padding:10px;border-radius:12px}
-    .alert.error{background:#fef2f2;border-color:#fecaca;color:#991b1b}
-    .alert.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
-    .alert.info{background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a}
-    .grid{display:grid;gap:12px}
-    .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
-    .stat{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px}
-    .stat .lbl{font-size:12px;color:#6b7280}
-    .stat .val{font-size:18px;font-weight:800}
-    .row{display:flex;gap:8px;align-items:center}
-    .field{display:flex;flex-direction:column;gap:6px}
-    .field label{font-size:12px;color:#6b7280}
-    input[type="text"], select{border:1px solid #e5e7eb;border-radius:10px;padding:9px 10px;font-size:14px;width:100%;background:#fff}
-    input[type="file"]{padding:6px}
-    .drop{border:2px dashed #d1d5db;border-radius:16px;padding:24px;text-align:center;background:#f9fafb}
-    .drop.drag{background:#eff6ff;border-color:#93c5fd}
-    .stage{display:flex;align-items:center;gap:8px;font-size:14px}
-    .spinner{width:18px;height:18px;border:2px solid #e5e7eb;border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    table{border-collapse:collapse;width:100%}
-    th,td{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left;font-size:14px}
-    th{background:#f9fafb;font-weight:800;cursor:pointer;user-select:none}
-    tr:hover{background:#f9fafb}
-    .pill{display:inline-flex;padding:2px 8px;border:1px solid #e5e7eb;border-radius:999px;font-size:12px}
-    details{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:8px}
-    .muted{color:#6b7280}
-    .right{display:flex;justify-content:flex-end;gap:8px}
-    .hidden{display:none!important}
-    .role-badge{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid #e5e7eb}
-    .cell-btn{width:26px;height:26px;border:1px solid #e5e7eb;border-radius:6px;background:#f3f4f6;display:inline-flex;align-items:center;justify-content:center;font-weight:800}
-    .cell-btn.on{background:var(--blue);color:#fff;border-color:#1d4ed8}
-    .footer-note{font-size:12px;color:#6b7280;margin-top:8px}
-    @media (max-width: 980px){
-      .sidebar{position:fixed;left:-9999px}
-      .main{margin:0;padding:12px}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mukja — Tip Payout Calculator</title>
+<style>
+  :root{--blue:#2563eb;--green:#16a34a;--purple:#8b5cf6;--red:#dc2626;--amber:#f59e0b;--gray:#6b7280;--bg:#f8fafc}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#111827}
+  .layout{display:flex;min-height:100vh}
+  .sidebar{width:260px;background:#fff;border-right:1px solid #e5e7eb;padding:16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:10px}
+  .brand{font-weight:900;font-size:20px;margin-bottom:4px}
+  .nav a{display:flex;align-items:center;gap:8px;text-decoration:none;color:#111827;padding:10px;border-radius:10px;margin:4px 0}
+  .nav a:hover{background:#f3f4f6}
+  .nav a.active{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+  .nav a.locked{opacity:.45;pointer-events:none}
+  .nav .check{margin-left:auto;color:var(--green)}
+  .main{flex:1;padding:22px}
+  .container{max-width:1200px;margin:0 auto}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 10px 22px rgba(0,0,0,.04);margin-bottom:14px}
+  .card .hd{padding:12px 14px;border-bottom:1px solid #e5e7eb}
+  .card .bd{padding:14px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;background:var(--blue);color:#fff}
+  .btn.green{background:var(--green)} .btn.purple{background:var(--purple)} .btn.red{background:var(--red)} .btn.gray{background:#e5e7eb;color:#111827}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .row{display:flex;align-items:center;gap:10px}
+  .right{display:flex;justify-content:flex-end;gap:8px}
+  .grid{display:grid;gap:10px}
+  .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12px;color:#6b7280}
+  input[type="text"],input[type="number"],select{width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px;background:#fff}
+  .drop{border:2px dashed #d1d5db;border-radius:14px;padding:22px;text-align:center;background:#f9fafb}
+  .drop.drag{background:#eff6ff;border-color:#93c5fd}
+  .chip{border:1px solid #e5e7eb;background:#f3f4f6;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800}
+  .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:800}
+  .b-blue{background:#dbeafe;color:#1d4ed8}
+  .stat{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px}
+  .stat .lbl{color:#6b7280;font-size:12px} .stat .val{font-weight:900;font-size:18px}
+  table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left;font-size:14px}
+  th{background:#f9fafb;font-weight:900;cursor:pointer;user-select:none}
+  .pill{display:inline-flex;border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;font-size:12px}
+  .cell-btn{width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f3f4f6;display:inline-flex;justify-content:center;align-items:center;font-weight:900}
+  .cell-btn.on{background:#2563eb;color:#fff;border-color:#1d4ed8}
+  .hidden{display:none!important} .muted{color:#6b7280}
+  details{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:8px}
+  .tabs{display:flex;gap:8px} .tab{padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;cursor:pointer} .tab.active{background:#e0e7ff;border-color:#c7d2fe}
+  .switch{display:inline-flex;align-items:center;gap:8px}
+  .sidebar .bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+  .exp{background:#fbfbff;border:1px dashed #e5e7eb;border-radius:10px;padding:10px;margin:8px 0}
+  @media print{ body{background:#fff} .sidebar,.main>.container>*:not(.print-area){display:none!important} .print-area{display:block!important} .print-area .card{border:none;box-shadow:none} }
+</style>
 </head>
 <body>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="brand">Mukja <span class="small">Tip Calculator</span></div>
+<div class="layout">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">Mukja <span class="muted" style="font-weight:600">Tip Calculator</span></div>
       <nav class="nav">
-        <a id="nav-upload" href="#" class="active">📄 CSV Upload <span class="check" id="check-upload"></span></a>
-        <a id="nav-review" href="#" class="locked">👥 Employee Review <span class="check" id="check-review"></span></a>
-        <a id="nav-attendance" href="#" class="locked">📅 Calendar Attendance <span class="check" id="check-att"></span></a>
-        <a id="nav-calc" href="#" class="locked">💰 Tip Calculator <span class="check" id="check-calc"></span></a>
+        <a id="nav-upload" class="active">📄 CSV Upload <span class="check" id="check-upload"></span></a>
+        <a id="nav-review" class="locked">👥 Employee Review <span class="check" id="check-review"></span></a>
+        <a id="nav-attendance" class="locked">📅 Calendar Attendance <span class="check" id="check-att"></span></a>
+        <a id="nav-calc" class="locked">💰 Tip Calculator <span class="check" id="check-calc"></span></a>
+        <a id="nav-archives">🗂 Archives</a>
       </nav>
-      <hr>
-      <div class="footer-note">Client-side only. Data persists to your browser.</div>
-    </aside>
-    <main class="main">
-      <div class="container">
-        <!-- Screen: Upload -->
-        <section id="screen-upload">
-          <div class="card">
-            <div class="hd"><h2>CSV Upload</h2><div class="muted">Drop your Toast POS CSV export. We’ll normalize columns and validate.</div></div>
-            <div class="bd">
-              <div id="dropzone" class="drop">
-                <div>Drop CSV here or</div>
-                <input type="file" id="csvInput" accept=".csv">
-                <div id="fileName" class="muted" style="margin-top:8px"></div>
-              </div>
-              <div id="stage" class="stage hidden" style="margin-top:10px;"><div class="spinner"></div><div id="stageText">Parsing…</div></div>
-              <div id="warnBox" class="alert warn hidden" style="margin-top:10px"></div>
-              <div id="errBox" class="alert error hidden" style="margin-top:10px"></div>
-              <div class="right" style="margin-top:10px">
-                <button class="btn gray" id="btnTemplate">Download Template</button>
-              </div>
+    </div>
+    <div class="bottom">
+      <button id="btnResetAll" class="btn gray">Start Over</button>
+      <div class="muted" style="font-size:12px">Client-side only. Data persists to your browser.</div>
+    </div>
+  </aside>
+
+  <main class="main"><div class="container">
+
+    <!-- Upload -->
+    <section id="screen-upload">
+      <div class="card"><div class="hd"><h2>CSV Upload</h2><div class="muted">Drop your Toast CSV. We normalize, validate, and process.</div></div>
+      <div class="bd">
+        <div id="dropzone" class="drop">
+          <div>Drop CSV here or</div>
+          <input type="file" id="csvInput" accept=".csv"/>
+          <div id="fileName" class="muted" style="margin-top:8px"></div>
+        </div>
+        <div id="stage" class="row hidden" style="margin-top:10px"><div class="chip" id="stageChip">Parsing…</div><div id="stageText" class="muted"></div></div>
+        <div id="warnBox" class="card hidden" style="border-left:6px solid var(--amber)"></div>
+        <div id="errBox" class="card hidden" style="border-left:6px solid var(--red)"></div>
+        <div class="right" style="margin-top:8px">
+          <button class="btn gray" id="btnTemplate">Download Template</button>
+          <button class="btn red" id="btnClearUpload">Clear Upload</button>
+        </div>
+      </div></div>
+      <div class="card"><div class="hd"><h3>How to export from Toast POS</h3></div>
+      <div class="bd"><ol>
+        <li>Reports → Payroll → Payroll Export</li><li>Select the 14-day period</li><li>Download CSV</li><li>Upload above</li>
+      </ol></div></div>
+    </section>
+
+    <!-- Review -->
+    <section id="screen-review" class="hidden">
+      <div class="card"><div class="hd"><h2>Review Employees</h2><div class="muted">Fix departments/roles for correct pools. Multiple roles per person are supported.</div></div>
+      <div class="bd">
+        <div class="row" style="gap:8px;margin-bottom:8px">
+          <span class="badge b-blue" id="stat-emps">Employees: 0</span>
+          <span class="badge" style="background:#fffbeb;color:#92400e" id="stat-warns">Warnings: 0</span>
+          <span class="badge" style="background:#fee2e2;color:#991b1b" id="stat-errs">Errors: 0</span>
+        </div>
+        <div id="valSummary"></div>
+      </div></div>
+      <div id="empGrid" class="grid cols-2"></div>
+      <div class="right"><button class="btn" id="toAttendance">Continue to Attendance →</button></div>
+    </section>
+
+    <!-- Attendance -->
+    <section id="screen-attendance" class="hidden">
+      <div class="card"><div class="hd"><h2>Calendar Attendance</h2><div class="muted">Pay Period: <span id="ppStart">—</span> → <span id="ppEnd">—</span></div></div>
+      <div class="bd">
+        <div class="grid cols-4">
+          <div class="stat"><div class="lbl">Total Employees (positions)</div><div class="val" id="stEmp">0</div></div>
+          <div class="stat"><div class="lbl">Days Worked</div><div class="val" id="stDays">0</div></div>
+          <div class="stat"><div class="lbl">Attendance Rate</div><div class="val" id="stRate">0%</div></div>
+          <div class="stat"><div class="lbl">Missing Records</div><div class="val" id="stMiss">0</div></div>
+        </div>
+      </div></div>
+      <div class="card"><div class="hd"><h3>Mark days worked</h3></div><div class="bd"><div style="overflow:auto"><table id="attTable"></table></div></div></div>
+      <div class="right"><button class="btn" id="toCalc">Continue to Tip Calculator →</button></div>
+    </section>
+
+    <!-- Calculator -->
+    <section id="screen-calc" class="hidden">
+      <div class="card"><div class="hd"><h2>Tip Calculator</h2><div class="muted">Daily-first math (60/10/30 of base by default) + BOH tiers (50/35/15). Drill down for per-day details.</div></div>
+      <div class="bd">
+        <details id="settings">
+          <summary><b>⚙️ Settings (tap to open)</b></summary>
+          <div class="grid cols-4" style="margin-top:8px">
+            <div class="field"><label>BOH % of base</label><input id="setBohPct" type="number" step="0.01" min="0" max="100"/></div>
+            <div class="field"><label>Host/Busser % (HB)</label><input id="setHbPct" type="number" step="0.01" min="0" max="100"/></div>
+            <div class="field"><label>HB Basis</label><select id="setHbBasis"><option value="original">of base (original)</option><option value="postBOH">of (base − BOH)</option></select></div>
+            <div class="field"><label>Credit Card Fee %</label><input id="setCcPct" type="number" step="0.01" min="0" max="100"/></div>
+          </div>
+          <div class="grid cols-3" style="margin-top:8px">
+            <div class="field"><label>CC Fee Application</label>
+              <select id="setCcApply"><option value="after">Deduct from server keep (after splits)</option><option value="before">Deduct before splits (reduces pools)</option></select>
+            </div>
+            <div class="field"><label>Include Gratuity in base?</label>
+              <select id="setIncludeGrat"><option value="yes">YES — add Gratuity to base</option><option value="no">NO — ignore Gratuity</option></select>
+            </div>
+            <div class="field"><label>Withholding % (before splits)</label><input id="setWithholdPct" type="number" step="0.01" min="0" max="100"/></div>
+          </div>
+          <div class="row" style="justify-content:space-between;margin-top:8px">
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <span class="badge b-blue" id="badgeRule"></span>
+              <button class="btn gray" id="btnPresetFohBoh" title="Set HB% = 0">Preset: FOH/BOH only</button>
+            </div>
+            <div class="row">
+              <button class="btn green" id="btnApply">Apply & Recalculate</button>
+              <button class="btn gray" id="btnPrintPolicy">Print Policy</button>
             </div>
           </div>
-          <div class="card">
-            <div class="hd"><h3>How to export from Toast POS</h3></div>
-            <div class="bd">
-              <ol>
-                <li>Go to <b>Reports → Payroll → Payroll Export</b></li>
-                <li>Select your 14-day pay period</li>
-                <li>Download CSV</li>
-                <li>Upload it above</li>
-              </ol>
+
+          <div class="exp">
+            <h4 style="margin:6px 0 4px 0">Tip Policy — Plain English</h4>
+            <ol style="margin:0 0 6px 18px">
+              <li><b>Daily-first.</b> We process each calendar day separately, then sum the period.</li>
+              <li><b>Base tips</b> = <i>Tips</i> + <i>Gratuity</i> − <i>Withholding</i> (3% default, before splits).</li>
+              <li>From each <b>server’s base</b> that day: <b>BOH</b> gets <b>30%</b>, <b>HB</b> gets <b>10%</b> (basis configurable), and the <b>server keeps the rest</b>. All are from the same base (not sequential), unless HB is set to “of (base − BOH)”.</li>
+              <li><b>Only staff who worked that day</b> receive that day’s pools.</li>
+              <li><b>BOH tiers</b> split the day’s BOH pool: Lead 50% (Cook/Meat/Prep), Assist 35% (Cook/Meat/Prep Assist), Dishwasher 15%.</li>
+              <li><b>Rounding:</b> After every step (to cents).</li>
+              <li><b>Credit card fee</b> can be taken <b>before</b> (reduces base/pools) or <b>after</b> (reduces server keep only).</li>
+              <li>For FOH/BOH-only: set <b>HB % = 0</b> (use the preset).</li>
+            </ol>
+            <div style="font-size:13px">
+              <b>Worked Example:</b> Tips $100, Gratuity $20, Withholding 3%, BOH 30%, HB 10% of base, CC 0% after.<br/>
+              Base = (100+20) − 3%×120 = <b>$116.40</b><br/>
+              BOH 30% = <b>$34.92</b>; HB 10% = <b>$11.64</b>; Server keeps = <b>$69.84</b>.
             </div>
           </div>
-        </section>
+        </details>
 
-        <!-- Screen: Review -->
-        <section id="screen-review" class="hidden">
-          <div class="card">
-            <div class="hd"><h2>Review Employees</h2><div class="muted">Verify departments and roles for accurate tip distribution</div></div>
-            <div class="bd">
-              <div class="row" style="gap:10px;margin-bottom:10px">
-                <span class="badge b-blue" id="stat-emps">Employees: 0</span>
-                <span class="badge b-yellow" id="stat-warns">Warnings: 0</span>
-                <span class="badge b-red" id="stat-errs">Errors: 0</span>
-              </div>
-              <div id="valSummary"></div>
-            </div>
+        <div id="analytics" class="grid cols-4" style="margin-top:10px"></div>
+
+        <div class="row" style="justify-content:space-between;margin-top:8px">
+          <div class="tabs" id="tabs-scope">
+            <div class="tab active" data-view="foh">FOH</div>
+            <div class="tab" data-view="boh">BOH</div>
+            <div class="tab" data-view="all">ALL</div>
           </div>
-          <div id="empGrid" class="grid cols-2"></div>
-          <div class="row right">
-            <button class="btn" id="toAttendance">Continue to Attendance →</button>
-          </div>
-        </section>
-
-        <!-- Screen: Attendance -->
-        <section id="screen-attendance" class="hidden">
-          <div class="card">
-            <div class="hd"><h2>Calendar Attendance</h2><div class="muted">Pay Period: <span id="ppStart">—</span> to <span id="ppEnd">—</span></div></div>
-            <div class="bd">
-              <div class="grid cols-4">
-                <div class="stat"><div class="lbl">Total Employees</div><div class="val" id="stEmp">0</div></div>
-                <div class="stat"><div class="lbl">Days Worked (sum)</div><div class="val" id="stDays">0</div></div>
-                <div class="stat"><div class="lbl">Attendance Rate</div><div class="val" id="stRate">0%</div></div>
-                <div class="stat"><div class="lbl">Missing Records</div><div class="val" id="stMiss">0</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="hd"><h3>Mark days worked</h3></div>
-            <div class="bd">
-              <div style="overflow:auto">
-                <table id="attTable"></table>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="hd"><h3>Add Employee</h3></div>
-            <div class="bd">
-              <div class="grid cols-3">
-                <div class="field"><label>Name</label><input type="text" id="addName"></div>
-                <div class="field"><label>Role</label>
-                  <select id="addRole">
-                    <option>server</option><option>host</option><option>busser</option>
-                    <option>cook</option><option>meat</option><option>prep</option>
-                    <option>cook assist</option><option>meat assist</option><option>prep assist</option>
-                    <option>dishwasher</option>
-                  </select>
-                </div>
-                <div class="field"><label>&nbsp;</label><button class="btn" id="btnAddEmp">Add</button></div>
-              </div>
-            </div>
-          </div>
-          <div class="row right">
-            <button class="btn" id="toCalc">Continue to Tip Calculator →</button>
-          </div>
-        </section>
-
-        <!-- Screen: Calculator -->
-        <section id="screen-calc" class="hidden">
-          <div class="card">
-            <div class="hd"><h2>Tip Calculator</h2><div class="muted">Daily-first math with BOH tiers (50/35/15)</div></div>
-            <div class="bd">
-              <div class="grid cols-3" id="analytics"></div>
-              <div class="right" style="margin-top:10px"><button class="btn" id="btnExport">Export CSV</button></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="hd"><h3>Results</h3></div>
-            <div class="bd">
-              <table id="resTable"></table>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-
-<script>
-(function(){
-  // ---------- State ----------
-  let state = loadState() || {
-    step: 'upload',
-    employees: [],           // {id,name,department,role}
-    workDays: [],            // {employeeId,date,worked,individualTips?}
-    payPeriodStart: '',
-    payPeriodEnd: '',
-    totalTips: 0,
-    distributions: []
-  }
-
-  const $ = sel => document.querySelector(sel)
-  const $$ = sel => Array.from(document.querySelectorAll(sel))
-
-  // ---------- Navigation ----------
-  const sections = {
-    upload: $('#screen-upload'),
-    review: $('#screen-review'),
-    attendance: $('#screen-attendance'),
-    calc: $('#screen-calc'),
-  }
-
-  const nav = {
-    upload: $('#nav-upload'),
-    review: $('#nav-review'),
-    attendance: $('#nav-attendance'),
-    calc: $('#nav-calc'),
-  }
-
-  function setStep(k){
-    state.step = k
-    saveState()
-    for(const [key,el] of Object.entries(sections)){
-      el.classList.toggle('hidden', key!==k)
-    }
-    for(const [key,el] of Object.entries(nav)){
-      el.classList.toggle('active', key===k)
-    }
-    // Lock/unlock
-    nav.upload.classList.remove('locked')
-    if (state.employees.length) { nav.review.classList.remove('locked'); $('#check-upload').textContent='✓' } else nav.review.classList.add('locked')
-    if (state.payPeriodStart && state.workDays.length && state.employees.length){ nav.attendance.classList.remove('locked'); $('#check-review').textContent='✓' } else nav.attendance.classList.add('locked')
-    if (state.distributions && state.distributions.length){ nav.calc.classList.remove('locked'); $('#check-att').textContent='✓' } else nav.calc.classList.add('locked')
-    if (k==='review') renderReview()
-    if (k==='attendance') renderAttendance()
-    if (k==='calc') renderCalc()
-  }
-
-  nav.upload.addEventListener('click', e=>{e.preventDefault(); setStep('upload')})
-  nav.review.addEventListener('click', e=>{e.preventDefault(); if(!nav.review.classList.contains('locked')) setStep('review')})
-  nav.attendance.addEventListener('click', e=>{e.preventDefault(); if(!nav.attendance.classList.contains('locked')) setStep('attendance')})
-  nav.calc.addEventListener('click', e=>{e.preventDefault(); if(!nav.calc.classList.contains('locked')) setStep('calc')})
-
-  // ---------- Utilities ----------
-  const ALLOWED_ROLES = ['server','host','busser','cook','meat','prep','cook assist','meat assist','prep assist','dishwasher']
-  const FOH = new Set(['server','host','busser'])
-  const BOH = new Set(['cook','meat','prep','cook assist','meat assist','prep assist','dishwasher'])
-  function r2(v){ return Math.round(v*100)/100 }
-  function nanoid(n=8){ const chars='abcdefghijklmnopqrstuvwxyz0123456789'; let s=''; for(let i=0;i<n;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s }
-  function saveState(){ localStorage.setItem('mukja-state-single-v2', JSON.stringify(state)) }
-  function loadState(){ try{ return JSON.parse(localStorage.getItem('mukja-state-single-v2')||'null') }catch(e){ return null } }
-
-  // CSV parsing (handles quotes, commas, newlines)
-  function parseCSV(text){
-    const rows = []; let i=0; const len=text.length
-    let row=[], cell='', inQuotes=false
-    while(i<len){
-      const ch = text[i]
-      if (inQuotes){
-        if (ch==='\"'){
-          if (text[i+1]==='\"'){ cell+='\"'; i+=2; continue }
-          inQuotes=false; i++; continue
-        } else { cell+=ch; i++; continue }
-      } else {
-        if (ch==='\"'){ inQuotes=true; i++; continue }
-        if (ch===','){ row.push(cell); cell=''; i++; continue }
-        if (ch==='\n'){ row.push(cell); rows.push(row); row=[]; cell=''; i++; continue }
-        if (ch==='\r'){ i++; continue }
-        cell+=ch; i++
-      }
-    }
-    row.push(cell); rows.push(row)
-    // headers
-    const headers = rows.shift() || []
-    return rows.filter(r=>r.some(x=>String(x).trim().length)).map(r=>{
-      const obj = {}
-      headers.forEach((h,idx)=> obj[String(h||'').trim()] = r[idx]===undefined?'':r[idx])
-      return obj
-    })
-  }
-
-  // Header normalization
-  const EMP_NAME_KEYS = ['employee name','employee','name','firstname + lastname','first name + last name','first + last']
-  const JOB_KEYS = ['job title','job','title']
-  const DATE_KEYS = ['work date','date','workdate','business date','open date']
-  const HOURS_KEYS = ['regular hours','hours','regularhours','reg hours','reg']
-  const TIPS_KEYS = ['total tips','tips','totaltips','cctips','non-cash tips','card tips','non-cash tips (card)','auto-grat']
-
-  function norm(s){ return String(s||'').trim().toLowerCase() }
-  function findHeader(headers, candidates){
-    for (const h of headers) if (candidates.includes(norm(h))) return h
-    for (const h of headers) { const n = norm(h); if (candidates.some(c=>n.includes(c))) return h }
-    return null
-  }
-
-  // Job normalization map (exact per your mapping)
-  const ROLE_MAP = {
-    'cook lead':'cook','lead cook':'cook','kitchen lead':'cook',
-    'meat lead':'meat','lead meat':'meat',
-    'prep lead':'prep','lead prep':'prep',
-    'cook assist':'cook assist','cook assistant':'cook assist','assistant cook':'cook assist','kitchen assistant':'cook assist',
-    'meat assist':'meat assist','meat assistant':'meat assist','assistant meat':'meat assist',
-    'prep assist':'prep assist','prep assistant':'prep assist','assistant prep':'prep assist',
-    'dishwash':'dishwasher','dish washer':'dishwasher','dish':'dishwasher','dishwasher':'dishwasher',
-    'host':'host','hostess':'host','host/hostess':'host',
-    'busser':'busser','bus':'busser','bus boy':'busser','bus girl':'busser','busperson':'busser',
-    'server':'server','waiter':'server','waitress':'server'
-  }
-
-  function parseDateFlexible(raw){
-    raw = String(raw||'').trim()
-    if (!raw) return null
-    let m = raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/)
-    if (m) { const d = new Date(Number(m[1]), Number(m[2])-1, Number(m[3])); if (!isNaN(d)) return fmtDate(d) }
-    m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/)
-    if (m){ let y = Number(m[3]); if (y<100) y = 2000+y; const d = new Date(y, Number(m[1])-1, Number(m[2])); if (!isNaN(d)) return fmtDate(d) }
-    m = raw.match(/^(\d{1,2})[- ]([A-Za-z]{3,})$/)
-    if (m){ const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','sept','oct','nov','dec']; let mi = months.indexOf(m[2].toLowerCase()); if (mi===8) mi=8; if (mi>=0){ const y=(new Date()).getFullYear(); const d = new Date(y, mi, Number(m[1])); if (!isNaN(d)) return fmtDate(d) } }
-    m = raw.match(/^([A-Za-z]{3,})[ ](\d{1,2}),[ ](\d{4})$/)
-    if (m){ const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']; const mi = months.indexOf(m[1].slice(0,3).toLowerCase()); if (mi>=0){ const d = new Date(Number(m[3]), mi, Number(m[2])); if (!isNaN(d)) return fmtDate(d) } }
-    return null
-  }
-  function fmtDate(d){
-    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), da=String(d.getDate()).padStart(2,'0')
-    return `${y}-${m}-${da}`
-  }
-
-  function processCSVText(text){
-    const data = parseCSV(text)
-    const errors=[], warnings=[]
-    if (!data.length){ errors.push('CSV file is empty'); return {errors,warnings} }
-    const headers = Object.keys(data[0]||{})
-    const empH = findHeader(headers, EMP_NAME_KEYS)
-    const jobH = findHeader(headers, JOB_KEYS)
-    const dateH = findHeader(headers, DATE_KEYS)
-    const hoursH = findHeader(headers, HOURS_KEYS)
-    const tipsH = findHeader(headers, TIPS_KEYS)
-    if (!empH) errors.push('Missing required column: Employee Name')
-    if (!jobH) errors.push('Missing required column: Job Title')
-    if (!dateH) errors.push('Missing required column: Work Date')
-    if (!tipsH) errors.push('Missing required column: Total Tips')
-    if (errors.length) return {errors,warnings}
-
-    const mapEmp = new Map()
-    const workDays = []
-    const dates = []
-    let totalTips=0
-
-    for (let i=0;i<data.length;i++){
-      const row = data[i]
-      const name = String(row[empH]||'').trim()
-      const rawJob = norm(row[jobH]||'')
-      const rawDate = String(row[dateH]||'').trim()
-      const tipsVal = Number(String(row[tipsH]||'0').replace(/[^0-9.\-]/g,'')) || 0
-      const hoursVal = hoursH ? Number(String(row[hoursH]||'0').replace(/[^0-9.\-]/g,'')) || 0 : (tipsVal>0?1:0)
-
-      if (!name){ warnings.push(`Row ${i+2}: Missing employee name`); continue }
-      let role = ROLE_MAP[rawJob] || rawJob
-      if (!ALLOWED_ROLES.includes(role)){ warnings.push(`Row ${i+2}: Unknown job title "${rawJob}", defaulted to "server"`); role='server' }
-      const department = FOH.has(role)?'FOH':'BOH'
-      const date = parseDateFlexible(rawDate)
-      if (!date){ errors.push(`Row ${i+2}: Invalid date "${rawDate}"`); continue }
-
-      let emp = mapEmp.get(name.toLowerCase())
-      if (!emp){ emp = {id:nanoid(), name, department, role}; mapEmp.set(name.toLowerCase(), emp) }
-      else if (emp.role !== role){ warnings.push(`"${name}" appears with roles "${emp.role}" and "${role}" – review in Employee Review`) }
-
-      if (hoursVal>0){
-        const wd = { employeeId: emp.id, date, worked:true }
-        if (role==='server') wd.individualTips = tipsVal
-        workDays.push(wd)
-        if (role==='server') totalTips = r2(totalTips + tipsVal)
-        dates.push(date)
-      }
-    }
-
-    if (!workDays.length) errors.push('No valid work records with hours > 0 were found.')
-    dates.sort()
-    const start = dates[0] || ''
-    let end = dates[dates.length-1] || ''
-    if (start && end){
-      const s = new Date(start); const e = new Date(s); e.setDate(s.getDate()+13)
-      if (new Date(end) > e){
-        warnings.push('CSV date range exceeds 14 days. Truncated pay period to the first 14 days. Review Attendance to include/exclude extras.')
-        end = fmtDate(e)
-      }
-    }
-
-    return { errors, warnings, employees:[...mapEmp.values()], workDays, payPeriodStart:start, payPeriodEnd:end, totalTips }
-  }
-
-  // ---------- Validation ----------
-  function levenshtein(a,b){
-    const m=a.length,n=b.length
-    const dp=Array.from({length:m+1},()=>Array(n+1).fill(0))
-    for(let i=0;i<=m;i++) dp[i][0]=i
-    for(let j=0;j<=n;j++) dp[0][j]=j
-    for(let i=1;i<=m;i++){
-      for(let j=1;j<=n;j++){
-        const cost=a[i-1]===b[j-1]?0:1
-        dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+cost)
-      }
-    }
-    return dp[m][n]
-  }
-
-  function validateEmployees(list){
-    const issues=[]
-    for (const e of list){
-      if (!ALLOWED_ROLES.includes(e.role)){
-        issues.push({sev:'ERROR', msg:`Unknown job title for ${e.name}: "${e.role}"`})
-      }
-      if (FOH.has(e.role) && e.department!=='FOH') issues.push({sev:'WARNING', msg:`${e.name}: FOH role "${e.role}" but department is ${e.department}`})
-      if (BOH.has(e.role) && e.department!=='BOH') issues.push({sev:'WARNING', msg:`${e.name}: BOH role "${e.role}" but department is ${e.department}`})
-    }
-    for (let i=0;i<list.length;i++){
-      for (let j=i+1;j<list.length;j++){
-        const a=list[i].name.trim().toLowerCase(), b=list[j].name.trim().toLowerCase()
-        if (a===b) issues.push({sev:'ERROR', msg:`Duplicate employee name detected: "${list[i].name}"`})
-        else{
-          const dist=levenshtein(a,b), maxLen=Math.max(a.length,b.length)||1, sim=1-dist/maxLen
-          if (sim>=0.8) issues.push({sev:'ERROR', msg:`Very similar names: "${list[i].name}" vs "${list[j].name}" – verify if same person`})
-          else if (sim>=0.6) issues.push({sev:'WARNING', msg:`Possibly similar names: "${list[i].name}" vs "${list[j].name}"`})
-        }
-      }
-    }
-    return issues
-  }
-
-  // ---------- Calculation (UPDATED STRICT) ----------
-  // For each server + day:
-  //   boh = round(30% of original)
-  //   afterBOH = round(original - boh)
-  //   hb = round(10% of afterBOH)
-  //   keep = round(afterBOH - hb)
-  // Pools (boh, hb) are distributed only among workers who worked THAT day.
-  function calculateTips(employees, workDays){
-    const resMap = new Map()
-    for (const emp of employees){
-      resMap.set(emp.id, { employeeId: emp.id, employeeName: emp.name, tipAmount:0, daysWorked:0, originalTips:0, bohContribution:0, hostBusserContribution:0, dailyBreakdown:[] })
-    }
-    const daysBy = {}
-    for (const wd of workDays){
-      if (!wd.worked) continue
-      if (!daysBy[wd.date]) daysBy[wd.date]=[]
-      daysBy[wd.date].push(wd)
-    }
-    const dates = Object.keys(daysBy).sort()
-    for (const date of dates){
-      const todays = daysBy[date]
-      let dailyBOH = 0, dailyHB = 0
-      const servers = todays.filter(wd => (employees.find(e=>e.id===wd.employeeId)||{}).role==='server')
-      for (const wd of servers){
-        const tips = wd.individualTips||0
-        const boh = r2(tips*0.30)
-        const afterBOH = r2(tips - boh)
-        const hb = r2(afterBOH*0.10)
-        const keep = r2(afterBOH - hb)
-        dailyBOH = r2(dailyBOH + boh); dailyHB = r2(dailyHB + hb)
-        const r = resMap.get(wd.employeeId)
-        r.tipAmount = r2(r.tipAmount + keep)
-        r.originalTips = r2(r.originalTips + tips)
-        r.bohContribution = r2(r.bohContribution + boh)
-        r.hostBusserContribution = r2(r.hostBusserContribution + hb)
-        r.daysWorked += 1
-        r.dailyBreakdown.push({ date, originalTips:tips, afterBOH, serverKeeps:keep, bohContribution:boh, hostBusserContribution:hb })
-      }
-      // BOH tiers
-      const bohWorkers = todays.filter(wd => (employees.find(e=>e.id===wd.employeeId)||{}).department==='BOH')
-      const leads = bohWorkers.filter(wd => ['cook','meat','prep'].includes((employees.find(e=>e.id===wd.employeeId)||{}).role))
-      const assists = bohWorkers.filter(wd => ['cook assist','meat assist','prep assist'].includes((employees.find(e=>e.id===wd.employeeId)||{}).role))
-      const dishers = bohWorkers.filter(wd => (employees.find(e=>e.id===wd.employeeId)||{}).role==='dishwasher')
-      const leadPool=r2(dailyBOH*0.50), assistPool=r2(dailyBOH*0.35), dishPool=r2(dailyBOH*0.15)
-      if (leads.length){ const per=r2(leadPool/leads.length); for (const wd of leads){ const r=resMap.get(wd.employeeId); r.tipAmount=r2(r.tipAmount+per); r.daysWorked+=1; r.dailyBreakdown.push({date,tier:'lead',poolShare:per}) } }
-      if (assists.length){ const per=r2(assistPool/assists.length); for (const wd of assists){ const r=resMap.get(wd.employeeId); r.tipAmount=r2(r.tipAmount+per); r.daysWorked+=1; r.dailyBreakdown.push({date,tier:'assist',poolShare:per}) } }
-      if (dishers.length){ const per=r2(dishPool/dishers.length); for (const wd of dishers){ const r=resMap.get(wd.employeeId); r.tipAmount=r2(r.tipAmount+per); r.daysWorked+=1; r.dailyBreakdown.push({date,tier:'dishwasher',poolShare:per}) } }
-      // Host/Busser
-      const hbWorkers = todays.filter(wd => ['host','busser'].includes((employees.find(e=>e.id===wd.employeeId)||{}).role))
-      if (hbWorkers.length){ const per=r2(dailyHB/hbWorkers.length); for (const wd of hbWorkers){ const r=resMap.get(wd.employeeId); r.tipAmount=r2(r.tipAmount+per); r.daysWorked+=1; r.dailyBreakdown.push({date,poolShare:per}) } }
-    }
-    return Array.from(resMap.values()).map(r=>({ ...r, tipAmount:r2(r.tipAmount), originalTips:r2(r.originalTips), bohContribution:r2(r.bohContribution), hostBusserContribution:r2(r.hostBusserContribution) }))
-  }
-
-  // ---------- Screen: Upload ----------
-  const drop = $('#dropzone')
-  const fileInput = $('#csvInput')
-  const fileName = $('#fileName')
-  const stageBox = $('#stage')
-  const stageText = $('#stageText')
-  const warnBox = $('#warnBox')
-  const errBox = $('#errBox')
-  $('#btnTemplate').addEventListener('click', ()=>{
-    const sample = [
-      ['Employee Name','Job Title','Work Date','Regular Hours','Total Tips'],
-      ['Jane Server','Server','2024-09-08','8','456.78'],
-      ['John Host','Host','2024-09-08','6','0'],
-      ['Alex Cook','Cook','2024-09-08','8','0']
-    ].map(r=>r.join(',')).join('\n')
-    downloadBlob(sample, 'toast-sample-template.csv', 'text/csv;charset=utf-8')
-  })
-
-  ;['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev, e=>{e.preventDefault(); drop.classList.add('drag')}))
-  ;['dragleave','drop'].forEach(ev=>drop.addEventListener(ev, e=>{e.preventDefault(); drop.classList.remove('drag')}))
-  drop.addEventListener('drop', e=>{
-    const f=e.dataTransfer.files&&e.dataTransfer.files[0]; if (f) handleFile(f)
-  })
-  fileInput.addEventListener('change', e=>{
-    const f=e.target.files&&e.target.files[0]; if (f) handleFile(f)
-  })
-
-  async function handleFile(f){
-    if (!f.name.toLowerCase().endsWith('.csv')){ showErr(['File must be CSV format']); return }
-    fileName.textContent = 'Selected: ' + f.name
-    stage('Parsing…')
-    const text = await f.text()
-    stage('Validating…')
-    const result = processCSVText(text)
-    showWarn(result.warnings||[])
-    if ((result.errors||[]).length){ showErr(result.errors); stageHide(); return }
-    stage('Processing…')
-    state.employees = result.employees
-    state.workDays = result.workDays
-    state.payPeriodStart = result.payPeriodStart
-    state.payPeriodEnd = result.payPeriodEnd
-    state.totalTips = result.totalTips
-    saveState()
-    stage('Data processed successfully, redirecting…')
-    setTimeout(()=>{ setStep('review') }, 700)
-  }
-
-  function stage(msg){ stageBox.classList.remove('hidden'); stageText.textContent=msg }
-  function stageHide(){ stageBox.classList.add('hidden') }
-  function showWarn(list){ if(!list.length){warnBox.classList.add('hidden'); warnBox.innerHTML=''; return} warnBox.classList.remove('hidden'); warnBox.innerHTML = '<b>Warnings</b><ul>'+list.map(x=>'<li>'+escapeHTML(x)+'</li>').join('')+'</ul>' }
-  function showErr(list){ if(!list.length){errBox.classList.add('hidden'); errBox.innerHTML=''; return} errBox.classList.remove('hidden'); errBox.innerHTML = '<b>Errors</b><ul>'+list.map(x=>'<li>'+escapeHTML(x)+'</li>').join('')+'</ul>' }
-
-  // ---------- Screen: Review ----------
-  $('#toAttendance').addEventListener('click', ()=>{
-    const issues = validateEmployees(state.employees)
-    const errors = issues.filter(i=>i.sev==='ERROR').length
-    if (errors>0){ alert('Fix errors before continuing.'); return }
-    saveState(); setStep('attendance')
-  })
-
-  function renderReview(){
-    const issues = validateEmployees(state.employees)
-    $('#stat-emps').textContent = 'Employees: ' + state.employees.length
-    $('#stat-warns').textContent = 'Warnings: ' + issues.filter(i=>i.sev==='WARNING').length
-    $('#stat-errs').textContent = 'Errors: ' + issues.filter(i=>i.sev==='ERROR').length
-    const valBox = $('#valSummary')
-    if (!issues.length) valBox.innerHTML = '<div class="alert info">All checks passed ✓</div>'
-    else {
-      const errs = issues.filter(i=>i.sev==='ERROR'), warns=issues.filter(i=>i.sev==='WARNING')
-      valBox.innerHTML = ''
-      if (errs.length) valBox.innerHTML += '<div class="alert error" style="margin-bottom:8px"><b>Errors</b><ul>'+errs.map(x=>'<li>'+escapeHTML(x.msg)+'</li>').join('')+'</ul></div>'
-      if (warns.length) valBox.innerHTML += '<div class="alert warn"><b>Warnings</b><ul>'+warns.map(x=>'<li>'+escapeHTML(x.msg)+'</li>').join('')+'</ul></div>'
-    }
-    const grid = $('#empGrid'); grid.innerHTML=''
-    for (const e of state.employees){
-      const card = document.createElement('div'); card.className='card'
-      const badge = FOH.has(e.role) ? (e.role==='server'?'(63% Keep)':'(HB Pool)') : '(30% Pool)'
-      card.innerHTML = `
-        <div class="bd">
-          <div class="row" style="justify-content:space-between;margin-bottom:8px">
-            <div class="row" style="gap:8px">
-              <strong>${escapeHTML(e.name)}</strong>
-            </div>
-            <span class="role-badge">${escapeHTML(titleCase(e.role))} ${badge}</span>
-          </div>
-          <div class="grid cols-3">
-            <div class="field"><label>Department</label>
-              <select data-dept="${e.id}">
-                <option value="FOH" ${e.department==='FOH'?'selected':''}>Front of House</option>
-                <option value="BOH" ${e.department==='BOH'?'selected':''}>Back of House</option>
-              </select>
-            </div>
-            <div class="field" style="grid-column:span 2"><label>Role</label>
-              <select data-role="${e.id}">
-                ${ALLOWED_ROLES.map(r=>'<option '+(e.role===r?'selected':'')+'>'+r+'</option>').join('')}
-              </select>
-            </div>
+          <div class="row">
+            <button class="btn" id="btnExport">Export CSV (current view)</button>
+            <button class="btn purple" id="btnPrintFoh">Print FOH Report</button>
+            <button class="btn purple" id="btnPrintBoh">Print BOH Report</button>
+            <button class="btn purple" id="btnPrintAll">Print ALL Report</button>
+            <button class="btn green" id="btnArchive">Save to Archive</button>
           </div>
         </div>
-      `
-      grid.appendChild(card)
-    }
-    // bindings
-    $$('#empGrid select[data-dept]').forEach(sel=>{
-      sel.addEventListener('change', e=>{
-        const id = sel.getAttribute('data-dept')
-        const dept = sel.value
-        const emp = state.employees.find(x=>x.id===id)
-        if (!emp) return
-        emp.department = dept
-        if (dept==='FOH' && !FOH.has(emp.role)) emp.role='server'
-        if (dept==='BOH' && !BOH.has(emp.role)) emp.role='cook'
-        saveState(); renderReview()
-      })
-    })
-    $$('#empGrid select[data-role]').forEach(sel=>{
-      sel.addEventListener('change', e=>{
-        const id = sel.getAttribute('data-role')
-        const emp = state.employees.find(x=>x.id===id)
-        if (!emp) return
-        emp.role = sel.value
-        emp.department = FOH.has(emp.role)?'FOH':'BOH'
-        saveState(); renderReview()
-      })
-    })
+      </div></div>
+
+      <div class="card"><div class="hd"><h3>Results (click a row to expand)</h3></div><div class="bd">
+        <table id="tblFOH"></table>
+        <table id="tblBOH" class="hidden"></table>
+        <table id="tblALL" class="hidden"></table>
+      </div></div>
+    </section>
+
+    <!-- Archives -->
+    <section id="screen-archives" class="hidden">
+      <div class="card"><div class="hd"><h2>Archives</h2><div class="muted">Saved runs are stored locally in your browser (no expiry).</div></div>
+      <div class="bd"><table id="tblArchives"></table></div>
+    </section>
+
+    <div id="printArea" class="print-area hidden"></div>
+  </div></main>
+</div>
+
+<script>
+/* ===== Utilities ===== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const r2 = n => Math.round((Number(n)||0)*100)/100;
+const money = n => '$'+(r2(n)).toFixed(2);
+const title = s => String(s||'').split(' ').map(p=>p? p[0].toUpperCase()+p.slice(1):p).join(' ');
+const canon = s => String(s||'').trim().toLowerCase();
+const uid = () => Math.random().toString(36).slice(2,10);
+const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const escape = s => String(s).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ===== Persistence ===== */
+const STATE_KEY='mukja-v10';
+const ARCH_KEY='mukja-archives-v1';
+let S = JSON.parse(localStorage.getItem(STATE_KEY)||'null') || {
+  step:'upload',
+  employees:[], workDays:[],
+  payPeriodStart:'', payPeriodEnd:'',
+  distributions:[],
+  settings:{
+    bohPct:30, hbPct:10, hbBasis:'original',
+    ccPct:0, ccApply:'after',
+    includeGrat:'yes', withholdPct:3
+  },
+  ui:{view:'foh'}
+};
+const save = ()=>localStorage.setItem(STATE_KEY, JSON.stringify(S));
+const getArchives = ()=>JSON.parse(localStorage.getItem(ARCH_KEY)||'[]');
+const putArchives = arr=>localStorage.setItem(ARCH_KEY, JSON.stringify(arr));
+
+/* ===== Navigation ===== */
+const screens={upload:'#screen-upload',review:'#screen-review',attendance:'#screen-attendance',calc:'#screen-calc',archives:'#screen-archives'};
+function setStep(step){
+  S.step=step; save();
+  for(const k in screens){ $(screens[k]).classList.toggle('hidden',k!==step); }
+  $('#nav-upload').classList.toggle('active',step==='upload');
+  $('#nav-review').classList.toggle('active',step==='review');
+  $('#nav-attendance').classList.toggle('active',step==='attendance');
+  $('#nav-calc').classList.toggle('active',step==='calc');
+  $('#nav-archives').classList.toggle('active',step==='archives');
+
+  $('#nav-review').classList.toggle('locked',!S.employees.length);
+  $('#nav-attendance').classList.toggle('locked',!S.workDays.length);
+  $('#nav-calc').classList.toggle('locked',!S.distributions.length);
+  if(S.employees.length) $('#check-upload').textContent='✓';
+  if(S.workDays.length) $('#check-review').textContent='✓';
+  if(S.distributions.length) $('#check-att').textContent='✓';
+
+  if(step==='review') renderReview();
+  if(step==='attendance') renderAttendance();
+  if(step==='calc') renderCalc();
+  if(step==='archives') renderArchives();
+}
+$('#nav-upload').onclick=()=>setStep('upload');
+$('#nav-review').onclick=()=>!$('#nav-review').classList.contains('locked')&&setStep('review');
+$('#nav-attendance').onclick=()=>!$('#nav-attendance').classList.contains('locked')&&setStep('attendance');
+$('#nav-calc').onclick=()=>!$('#nav-calc').classList.contains('locked')&&setStep('calc');
+$('#nav-archives').onclick=()=>setStep('archives');
+
+/* ===== CSV Parsing ===== */
+function simpleCSV(text){
+  // tiny CSV (supports quoted fields / escaped quotes)
+  const out=[]; let i=0,row=[],cell='',q=false;
+  while(i<text.length){
+    const ch=text[i++];
+    if(q){ if(ch==='\"'){ if(text[i]==='\"'){cell+='\"';i++;} else q=false; }
+          else cell+=ch; }
+    else { if(ch==='\"') q=true;
+           else if(ch===','){ row.push(cell); cell=''; }
+           else if(ch==='\n'){ row.push(cell); out.push(row); row=[]; cell=''; }
+           else if(ch!=='\r'){ cell+=ch; } }
   }
+  row.push(cell); out.push(row);
+  const headers=out.shift()||[];
+  return out.filter(r=>r.some(x=>String(x).trim())).map(r=>{
+    const o={}; headers.forEach((h,idx)=>o[String(h||'').trim()]=r[idx]??''); return o;
+  });
+}
+function parseDateFlexible(raw){
+  raw=String(raw||'').trim(); if(!raw) return null;
+  let m=raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/); if(m){const d=new Date(+m[1],+m[2]-1,+m[3]); if(!isNaN(d)) return d;}
+  m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/); if(m){let y=+m[3]; if(y<100) y=2000+y; const d=new Date(y,+m[1]-1,+m[2]); if(!isNaN(d)) return d;}
+  m=raw.match(/^(\d{1,2})[- ]([A-Za-z]{3,})$/); if(m){const months=['jan','feb','mar','apr','may','jun','jul','aug','sep','sept','oct','nov','dec']; let mi=months.indexOf(m[2].toLowerCase()); if(mi===8) mi=8; if(mi>=0){ const d=new Date(new Date().getFullYear(),mi,+m[1]); if(!isNaN(d)) return d; } }
+  return null;
+}
+const H_EMP=['employee name','employee','name','firstname + lastname','first + last','first name + last name'];
+const H_JOB=['job title','job','title','position'];
+const H_DATE=['work date','date','workdate','business date'];
+const H_HRS=['regular hours','hours','regularhours','reg hours','hours worked','job hours','total hours','reg hrs'];
+const H_TIPS=['total tips','tips','totaltips','cctips','credit card tips','card tips','non-cash tips','tips total'];
+const H_GRAT=['gratuity','auto gratuity','auto-grat','auto grat','gratuity tips','grats'];
+const H_WITHH=['withheld amount','withheld','tips withheld','withhold'];
+function findHeader(headers,keys){ const n=headers.map(h=>canon(h)); for(let i=0;i<headers.length;i++){ if(keys.includes(n[i])) return headers[i]; }
+  for(let i=0;i<headers.length;i++){ if(keys.some(k=>n[i].includes(k))) return headers[i]; } return null; }
 
-  // ---------- Screen: Attendance ----------
-  $('#btnAddEmp').addEventListener('click', ()=>{
-    const name = $('#addName').value.trim()
-    const role = $('#addRole').value
-    if (!name){ alert('Enter a name'); return }
-    const id = nanoid()
-    const dept = FOH.has(role)?'FOH':'BOH'
-    state.employees.push({id, name, department:dept, role})
-    const dates = range14(state.payPeriodStart)
-    for (const d of dates){ state.workDays.push({employeeId:id, date:d, worked:false}) }
-    saveState(); renderAttendance()
-    $('#addName').value=''
-  })
+const ROLE_MAP={
+  'cook lead':'cook','lead cook':'cook','kitchen lead':'cook','meat lead':'meat','lead meat':'meat','prep lead':'prep','lead prep':'prep',
+  'cook assist':'cook assist','cook assistant':'cook assist','assistant cook':'cook assist','kitchen assistant':'cook assist',
+  'meat assist':'meat assist','meat assistant':'meat assist','assistant meat':'meat assist',
+  'prep assist':'prep assist','prep assistant':'prep assist','assistant prep':'prep assist',
+  'dishwasher':'dishwasher','dish':'dishwasher','dish washer':'dishwasher','dishwash':'dishwasher',
+  'host':'host','hostess':'host','host/hostess':'host',
+  'busser':'busser','bus':'busser','bus boy':'busser','busgirl':'busser','bus person':'busser','busperson':'busser',
+  'server':'server','waiter':'server','waitress':'server','expo':'expo'
+};
+const FOH_ROLES=new Set(['server','host','busser','expo']);
 
-  $('#toCalc').addEventListener('click', ()=>{
-    state.distributions = calculateTips(state.employees, state.workDays)
-    saveState(); setStep('calc')
-  })
+function processCSV(text){
+  const rows=simpleCSV(text); const errors=[],warnings=[];
+  if(!rows.length){errors.push('CSV file is empty'); return {errors,warnings};}
+  const headers=Object.keys(rows[0]||{});
+  const hEmp=findHeader(headers,H_EMP), hJob=findHeader(headers,H_JOB), hDate=findHeader(headers,H_DATE),
+        hHrs=findHeader(headers,H_HRS), hTips=findHeader(headers,H_TIPS),
+        hGrat=findHeader(headers,H_GRAT), hWith=findHeader(headers,H_WITHH);
+  if(!hEmp) errors.push('Missing Employee Name column');
+  if(!hJob) errors.push('Missing Job Title column');
+  if(!hDate) errors.push('Missing Work Date column');
+  if(!hTips) warnings.push('No recognizable Tips column (we’ll treat missing as $0)');
+  if(errors.length) return {errors,warnings};
 
-  function renderAttendance(){
-    $('#ppStart').textContent = state.payPeriodStart||'—'
-    $('#ppEnd').textContent = state.payPeriodEnd||'—'
-    const dates = range14(state.payPeriodStart)
-    let daysWorked=0, missing=0
-    for (const e of state.employees){
-      for (const d of dates){
-        const wd = state.workDays.find(w=>w.employeeId===e.id && w.date===d)
-        if (!wd) missing++
-        if (wd && wd.worked) daysWorked++
-      }
+  const emps=new Map(); // key: person::role
+  const workDays=[]; const dates=[];
+  for(let i=0;i<rows.length;i++){
+    const row=rows[i];
+    const rawName=String(row[hEmp]||'').trim(); if(!rawName){warnings.push(`Row ${i+2}: missing employee name`); continue;}
+    const nameKey=rawName.toLowerCase().replace(/\s+/g,' ').trim().replace(/,+/g,'');
+    let role=ROLE_MAP[canon(row[hJob]||'')]||canon(row[hJob]||'')||'server';
+    const dt=parseDateFlexible(row[hDate]); if(!dt){errors.push(`Row ${i+2}: invalid date "${row[hDate]}"`); continue;}
+    const date=fmt(dt); if(!dates.includes(date)) dates.push(date);
+    const hours=hHrs?Number(String(row[hHrs]||'0').replace(/[^0-9.\-]/g,''))||0:0;
+    const tips=hTips?Number(String(row[hTips]||'0').replace(/[^0-9.\-]/g,''))||0:0;
+    const grat=hGrat?Number(String(row[hGrat]||'0').replace(/[^0-9.\-]/g,''))||0:0;
+    const withheld=hWith?Number(String(row[hWith]||'0').replace(/[^0-9.\-]/g,''))||0:0;
+
+    const posKey=nameKey+'::'+role;
+    if(!emps.has(posKey)){
+      const empId=uid();
+      const dept=FOH_ROLES.has(role)?'FOH':'BOH';
+      emps.set(posKey,{id:empId,name:rawName,department:dept,role});
     }
-    $('#stEmp').textContent = String(state.employees.length)
-    $('#stDays').textContent = String(daysWorked)
-    const totalSlots = state.employees.length * dates.length || 1
-    $('#stRate').textContent = Math.round(daysWorked/totalSlots*100) + '%'
-    $('#stMiss').textContent = String(missing)
-    const thead = '<tr><th>Employee</th>'+dates.map(d=>'<th>'+shortLabel(d)+'</th>').join('')+'<th>Days</th></tr>'
-    let tbody = ''
-    for (const e of state.employees){
-      let row = '<tr><td>'+escapeHTML(e.name)+' <span class="muted">('+titleCase(e.role)+')</span></td>'
-      let days=0
-      for (const d of dates){
-        let wd = state.workDays.find(w=>w.employeeId===e.id && w.date===d)
-        if (!wd){ wd = {employeeId:e.id, date:d, worked:false}; state.workDays.push(wd); missing-- }
-        const on = !!wd.worked; if (on) days++
-        row += `<td><button class="cell-btn ${on?'on':''}" data-toggle="${e.id}__${d}">${on?'✓':''}</button></td>`
-      }
-      row += `<td>${days}/14</td></tr>`
-      tbody += row
-    }
-    $('#attTable').innerHTML = '<thead>'+thead+'</thead><tbody>'+tbody+'</tbody>'
-    $$('#attTable .cell-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const key = btn.getAttribute('data-toggle')
-        const [id, date] = key.split('__')
-        const wd = state.workDays.find(w=>w.employeeId===id && w.date===date)
-        if (wd){ wd.worked = !wd.worked }
-        else { state.workDays.push({employeeId:id, date, worked:true}) }
-        saveState(); renderAttendance()
-      })
-    })
-  }
-
-  function range14(start){
-    if (!start) return []
-    const s = new Date(start)
-    const arr=[]
-    for (let i=0;i<14;i++){ const d=new Date(s); d.setDate(s.getDate()+i); arr.push(fmtDate(d)) }
-    return arr
-  }
-  function shortLabel(date){
-    const d=new Date(date); const wd=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]
-    return d.getDate()+' '+wd
-  }
-
-  // ---------- Screen: Calculator ----------
-  function renderCalc(){
-    const dists = state.distributions = calculateTips(state.employees, state.workDays)
-    saveState()
-    const totalDistributed = dists.reduce((s,d)=>s+d.tipAmount,0)
-    const serverKeeps = dists.filter(d=>getRole(d.employeeId)==='server').reduce((s,d)=>s+d.tipAmount,0)
-    const bohPool = dists.reduce((s,d)=>s+d.bohContribution,0)
-    const hbPool = dists.reduce((s,d)=>s+d.hostBusserContribution,0)
-    const originalTips = dists.reduce((s,d)=>s+d.originalTips,0)
-    const employeesPaid = dists.filter(d=>d.tipAmount>0).length
-    $('#analytics').innerHTML = [
-      cardStat('Total Distributed', money(totalDistributed)),
-      cardStat('Server Keeps (≈63%)', money(serverKeeps)),
-      cardStat('BOH Pool (30%)', money(bohPool)),
-      cardStat('Host/Busser Pool (10% of 70%)', money(hbPool)),
-      cardStat('Original Tips', money(originalTips)),
-      cardStat('Employees Paid', String(employeesPaid))
-    ].join('')
-
-    let sortKey = 'tipAmount', sortDir = 'desc'
-    function renderTable(){
-      const rows = dists.map(d=>({ ...d, role:getRole(d.employeeId) }))
-      rows.sort((a,b)=>{
-        const av=a[sortKey]??0, bv=b[sortKey]??0
-        if (typeof av==='string' && typeof bv==='string') return sortDir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av)
-        return sortDir==='asc' ? av-bv : bv-av
-      })
-      const headers = [
-        ['employeeName','Employee Name'],
-        ['role','Role'],
-        ['daysWorked','Days Worked'],
-        ['tipAmount','Tip Amount'],
-        ['originalTips','Original Tips'],
-        ['bohContribution','BOH Contribution'],
-        ['hostBusserContribution','Host/Busser Contribution']
-      ]
-      const thead = '<tr>'+headers.map(([k,l])=>`<th data-sort="${k}">${l}${sortKey===k?' '+(sortDir==='asc'?'▲':'▼'):''}</th>`).join('')+'</tr>'
-      let tbody = ''
-      for (const r of rows){
-        tbody += `<tr class="res-row" data-id="${r.employeeId}">
-          <td>${escapeHTML(r.employeeName)}</td>
-          <td><span class="pill">${titleCase(r.role)}</span></td>
-          <td>${r.daysWorked}</td>
-          <td>${money(r.tipAmount)}</td>
-          <td>${r.originalTips?money(r.originalTips):'N/A'}</td>
-          <td>${r.bohContribution?money(r.bohContribution):'N/A'}</td>
-          <td>${r.hostBusserContribution?money(r.hostBusserContribution):'N/A'}</td>
-        </tr>
-        <tr class="detail hidden" data-det="${r.employeeId}"><td colspan="7">${detailBlock(r, r.role)}</td></tr>`
-      }
-      $('#resTable').innerHTML = '<thead>'+thead+'</thead><tbody>'+tbody+'</tbody>'
-      $$('#resTable th[data-sort]').forEach(th=>{
-        th.addEventListener('click', ()=>{
-          const k = th.getAttribute('data-sort')
-          if (k===sortKey) sortDir = sortDir==='asc'?'desc':'asc'
-          else { sortKey=k; sortDir='desc' }
-          renderTable()
-        })
-      })
-      $$('#resTable .res-row').forEach(tr=>{
-        tr.addEventListener('click', ()=>{
-          const id = tr.getAttribute('data-id')
-          const det = document.querySelector(`tr[data-det="${id}"]`)
-          det.classList.toggle('hidden')
-        })
-      })
-    }
-    renderTable()
-
-    $('#btnExport').onclick = ()=>{
-      const header = ['Employee Name','Role','Days Worked','Tip Amount','Original Tips','BOH Contribution','Host/Busser Contribution']
-      const rows = state.distributions.map(d=>[
-        d.employeeName, titleCase(getRole(d.employeeId)), d.daysWorked, money(d.tipAmount),
-        d.originalTips?money(d.originalTips):'N/A',
-        d.bohContribution?money(d.bohContribution):'N/A',
-        d.hostBusserContribution?money(d.hostBusserContribution):'N/A'
-      ])
-      const csv = [header, ...rows].map(r=>r.join(',')).join('\n')
-      const name = `tip-distribution-${state.payPeriodStart||'start'}-${state.payPeriodEnd||'end'}.csv`
-      downloadBlob(csv, name, 'text/csv;charset=utf-8')
+    const emp=emps.get(posKey);
+    if(hours>0){
+      const wd={employeeId:emp.id,date,worked:true};
+      if(role==='server'){ wd.individualTips=tips; wd.gratuity=grat; wd.withheldAmt=withheld; wd.hours=hours; }
+      else { wd.hours=hours; }
+      workDays.push(wd);
     }
   }
+  dates.sort();
+  const employees=[...emps.values()];
+  if(!employees.length){errors.push('No valid employees found');}
+  return {errors,warnings,employees,workDays,dates};
+}
 
-  function getRole(id){ return (state.employees.find(e=>e.id===id)||{}).role||'' }
-  function money(n){ return '$'+(r2(n)).toFixed(2) }
-  function cardStat(label,val){ return `<div class="stat"><div class="lbl">${label}</div><div class="val">${val}</div></div>` }
-  function detailBlock(r, role){
-    if (role==='server'){
-      let html = '<details><summary>Daily Breakdown</summary><table><thead><tr><th>Date</th><th>Original Tips</th><th>After BOH (70%)</th><th>HB (10% of 70%)</th><th>Server Keeps</th><th>BOH (30%)</th></tr></thead><tbody>'
-      for (const d of r.dailyBreakdown.filter(x=>x.originalTips!==undefined)){
-        html += `<tr><td>${d.date}</td><td>${money(d.originalTips||0)}</td><td>${money(d.afterBOH||0)}</td><td>${money(d.hostBusserContribution||0)}</td><td>${money(d.serverKeeps||0)}</td><td>${money(d.bohContribution||0)}</td></tr>`
-      }
-      html += '</tbody></table></details>'
-      return html
-    } else if (role==='host' || role==='busser'){
-      let html = '<details><summary>Daily Breakdown</summary><table><thead><tr><th>Date</th><th>Share</th></tr></thead><tbody>'
-      for (const d of r.dailyBreakdown.filter(x=>x.poolShare!==undefined && !x.tier)){
-        html += `<tr><td>${d.date}</td><td>${money(d.poolShare||0)}</td></tr>`
-      }
-      html += '</tbody></table></details>'
-      return html
-    } else {
-      let html = '<details><summary>Daily Breakdown</summary><table><thead><tr><th>Date</th><th>Tier</th><th>Share</th></tr></thead><tbody>'
-      for (const d of r.dailyBreakdown.filter(x=>x.tier)){
-        html += `<tr><td>${d.date}</td><td>${titleCase(d.tier)}</td><td>${money(d.poolShare||0)}</td></tr>`
-      }
-      html += '</tbody></table></details>'
-      return html
+/* ===== Upload handlers ===== */
+$('#csvInput').addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  $('#fileName').textContent=file.name;
+  const reader=new FileReader();
+  reader.onload=()=>handleCSV(reader.result);
+  reader.readAsText(file);
+});
+const dz=$('#dropzone');
+dz.addEventListener('dragover',e=>{e.preventDefault(); dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault(); dz.classList.remove('drag');
+  const file=e.dataTransfer.files[0]; if(!file) return;
+  $('#csvInput').files=e.dataTransfer.files;
+  $('#fileName').textContent=file.name;
+  const reader=new FileReader(); reader.onload=()=>handleCSV(reader.result); reader.readAsText(file);
+});
+$('#btnClearUpload').onclick=()=>{
+  $('#csvInput').value=''; $('#fileName').textContent='';
+  $('#warnBox').classList.add('hidden'); $('#errBox').classList.add('hidden');
+};
+$('#btnTemplate').onclick=()=>{
+  const head=['Employee Name','Job Title','Work Date','Regular Hours','Total Tips','Gratuity','Withheld Amount'];
+  const sample=`${head.join(',')}\nJane Doe,Server,2025-09-08,8,250.35,40.00,0\nJohn Roe,Cook,2025-09-08,8,0,0,0\n`;
+  downloadFile('mukja-sample.csv',sample);
+};
+
+function showMsg(boxId,items,color){
+  const box=$(boxId); if(!items || !items.length){ box.classList.add('hidden'); return; }
+  box.innerHTML=`<div class="bd"><b style="color:${color}">${items.length} issue(s)</b><ul>${items.map(x=>`<li>${escape(x)}</li>`).join('')}</ul></div>`;
+  box.classList.remove('hidden');
+}
+
+function handleCSV(text){
+  $('#stage').classList.remove('hidden'); $('#stageText').textContent='Parsing → Validating → Processing';
+  const res=processCSV(text);
+  showMsg('#warnBox',res.warnings,'#92400e'); showMsg('#errBox',res.errors,'#991b1b');
+  if(res.errors && res.errors.length){ $('#stageText').textContent='Blocked by errors'; return; }
+  // Save into state
+  S.employees=res.employees; S.workDays=res.workDays;
+  S.payPeriodStart=res.dates[0]||''; S.payPeriodEnd=res.dates[res.dates.length-1]||'';
+  save();
+  $('#stageText').textContent='Data processed successfully';
+  setTimeout(()=>{ setStep('review'); },400);
+}
+
+/* ===== Review ===== */
+function renderReview(){
+  $('#stat-emps').textContent='Employees: '+S.employees.length;
+  $('#valSummary').innerHTML=`<div class="card"><div class="bd"><b>Tip pools</b>: <span class="badge b-blue">Server keep</span> + <span class="badge" style="background:#dcfce7;color:#166534">Host/Busser</span> + <span class="badge" style="background:#ede9fe;color:#5b21b6">BOH</span>. Match roles to FOH/BOH correctly.</div></div>`;
+  const grid=$('#empGrid'); grid.innerHTML='';
+  for(const emp of S.employees){
+    const el=document.createElement('div'); el.className='card';
+    el.innerHTML=`
+      <div class="bd grid cols-3">
+        <div class="field"><label>Name</label><input value="${escape(emp.name)}" data-k="name"></div>
+        <div class="field"><label>Department</label>
+          <select data-k="department">
+            <option ${emp.department==='FOH'?'selected':''}>FOH</option>
+            <option ${emp.department==='BOH'?'selected':''}>BOH</option>
+          </select>
+        </div>
+        <div class="field"><label>Role</label>
+          <select data-k="role">
+            ${['server','host','busser','expo','cook','meat','prep','cook assist','meat assist','prep assist','dishwasher'].map(r=>`<option ${emp.role===r?'selected':''}>${r}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+    el.querySelectorAll('[data-k]').forEach(inp=>{
+      inp.onchange=()=>{
+        emp[inp.dataset.k]=inp.value;
+        if(['server','host','busser','expo'].includes(emp.role)) emp.department='FOH'; else emp.department='BOH';
+        save(); renderReview();
+      };
+    });
+    grid.appendChild(el);
+  }
+  $('#toAttendance').onclick=()=>{
+    calcTips(); // pre-calc to unlock next screen
+    setStep('attendance');
+  };
+}
+
+/* ===== Attendance ===== */
+function renderAttendance(){
+  $('#ppStart').textContent=S.payPeriodStart||'—';
+  $('#ppEnd').textContent=S.payPeriodEnd||'—';
+  // Build unique employee list + date columns
+  const dates=[...new Set(S.workDays.map(w=>w.date))].sort();
+  const byEmp=new Map(); for(const wd of S.workDays){ if(!byEmp.has(wd.employeeId)) byEmp.set(wd.employeeId,{}); byEmp.get(wd.employeeId)[wd.date]=wd; }
+  const table=$('#attTable'); table.innerHTML='';
+  let thead='<tr><th>Employee</th><th>Role</th>'+dates.map(d=>`<th>${d.slice(5)}</th>`).join('')+'</tr>';
+  let rows='';
+  for(const emp of S.employees){
+    const map=byEmp.get(emp.id)||{};
+    rows+='<tr><td>'+escape(emp.name)+'</td><td>'+emp.role+'</td>';
+    for(const d of dates){
+      const wd=map[d]; const on=wd&&wd.worked? 'on':'';
+      rows+=`<td><button class="cell-btn ${on}" data-emp="${emp.id}" data-date="${d}">${on?'✓':''}</button></td>`;
     }
+    rows+='</tr>';
+  }
+  table.innerHTML=thead+rows;
+  table.querySelectorAll('.cell-btn').forEach(b=>{
+    b.onclick=()=>{
+      const emp=b.dataset.emp, date=b.dataset.date;
+      let rec=S.workDays.find(x=>x.employeeId===emp && x.date===date);
+      if(!rec){ rec={employeeId:emp,date,worked:false}; S.workDays.push(rec); }
+      rec.worked=!rec.worked; b.classList.toggle('on',rec.worked); b.textContent=rec.worked?'✓':'';
+      save();
+    };
+  });
+
+  const totalRows=S.workDays.length;
+  const worked=S.workDays.filter(w=>w.worked).length;
+  $('#stEmp').textContent=S.employees.length;
+  $('#stDays').textContent=worked;
+  $('#stRate').textContent=totalRows? Math.round(100*worked/totalRows)+'%':'0%';
+  $('#stMiss').textContent=0;
+
+  $('#toCalc').onclick=()=>{ calcTips(); setStep('calc'); };
+}
+
+/* ===== Calculation ===== */
+function round2(x){ return Math.round((x||0)*100)/100; }
+
+function calcTips(){
+  const cfg=S.settings;
+  // Build results map per employee
+  const results=new Map();
+  for(const e of S.employees){
+    results.set(e.id,{employeeId:e.id,employeeName:e.name,role:e.role,department:e.department,
+      daysWorked:0, tipAmount:0, originalTips:0, bohContribution:0, hbContribution:0, ccFees:0, baseTips:0,
+      daily:[]});
+  }
+  // Group by date
+  const days={}; for(const wd of S.workDays){ if(!days[wd.date]) days[wd.date]=[]; days[wd.date].push(wd); }
+  const dates=Object.keys(days).sort();
+
+  let totalBoh=0,totalHb=0,totalServer=0,totalBase=0,totalOrig=0,totalCc=0;
+  dates.forEach(date=>{
+    const todays=days[date].filter(d=>d.worked);
+    // Servers present?
+    const serverWD=todays.filter(wd=> (S.employees.find(e=>e.id===wd.employeeId)?.role)==='server');
+    let dailyBohPool=0, dailyHbPool=0;
+    serverWD.forEach(wd=>{
+      const emp=S.employees.find(e=>e.id===wd.employeeId);
+      const tips=round2(wd.individualTips||0);
+      const grat=(cfg.includeGrat==='yes')? round2(wd.gratuity||0):0;
+      const basePre=round2(tips + grat);
+      // Withholding amount (CSV value overrides %)
+      const withheld=round2( (wd.withheldAmt && wd.withheldAmt>0)? wd.withheldAmt : basePre*(cfg.withholdPct||0)/100 );
+      let base=round2(basePre - withheld);
+      const ccBefore= (cfg.ccApply==='before')? round2(base*(cfg.ccPct||0)/100):0;
+      const splitBase=round2(base - ccBefore);
+
+      const boh=round2(splitBase*(cfg.bohPct||0)/100);
+      const hb= (cfg.hbPct||0)==0 ? 0 :
+        (cfg.hbBasis==='postBOH' ? round2((splitBase - boh)*(cfg.hbPct||0)/100) : round2(splitBase*(cfg.hbPct||0)/100));
+      let serverKeep=round2(splitBase - boh - hb);
+      const ccAfter=(cfg.ccApply==='after')? round2(base*(cfg.ccPct||0)/100):0;
+      serverKeep=round2(serverKeep - ccAfter);
+
+      dailyBohPool=round2(dailyBohPool + boh);
+      dailyHbPool=round2(dailyHbPool + hb);
+
+      const r=results.get(emp.id);
+      r.tipAmount=round2(r.tipAmount + serverKeep);
+      r.originalTips=round2(r.originalTips + tips);
+      r.baseTips=round2(r.baseTips + base);
+      r.bohContribution=round2(r.bohContribution + boh);
+      r.hbContribution=round2(r.hbContribution + hb);
+      r.ccFees=round2(r.ccFees + ccBefore + ccAfter);
+      r.daysWorked++;
+      r.daily.push({date,kind:'server',base,tips,grat,withheld,serverKeep,boh,hb,cc:ccBefore+ccAfter});
+    });
+
+    // Distribute BOH pool by tiers among BOH who worked
+    const bohWD=todays.filter(wd=> (S.employees.find(e=>e.id===wd.employeeId)?.department)==='BOH');
+    const leads=bohWD.filter(wd=>['cook','meat','prep'].includes(S.employees.find(e=>e.id===wd.employeeId)?.role));
+    const assists=bohWD.filter(wd=>['cook assist','meat assist','prep assist'].includes(S.employees.find(e=>e.id===wd.employeeId)?.role));
+    const dish=bohWD.filter(wd=> (S.employees.find(e=>e.id===wd.employeeId)?.role)==='dishwasher');
+
+    const leadPool=round2(dailyBohPool*0.50), assistPool=round2(dailyBohPool*0.35), dishPool=round2(dailyBohPool*0.15);
+    if(leads.length){ const per=round2(leadPool/leads.length); leads.forEach(wd=>{ const r=results.get(wd.employeeId); r.tipAmount=round2(r.tipAmount+per); r.daysWorked++; r.daily.push({date,kind:'boh',tier:'Lead',share:per}); }); }
+    if(assists.length){ const per=round2(assistPool/assists.length); assists.forEach(wd=>{ const r=results.get(wd.employeeId); r.tipAmount=round2(r.tipAmount+per); r.daysWorked++; r.daily.push({date,kind:'boh',tier:'Assist',share:per}); }); }
+    if(dish.length){ const per=round2(dishPool/dish.length); dish.forEach(wd=>{ const r=results.get(wd.employeeId); r.tipAmount=round2(r.tipAmount+per); r.daysWorked++; r.daily.push({date,kind:'boh',tier:'Dish',share:per}); }); }
+
+    // Distribute HB pool among hosts + bussers who worked
+    const hbWD=todays.filter(wd=> {
+      const role=S.employees.find(e=>e.id===wd.employeeId)?.role;
+      return role==='host'||role==='busser';
+    });
+    if(hbWD.length){
+      const per=round2(dailyHbPool/hbWD.length);
+      hbWD.forEach(wd=>{ const r=results.get(wd.employeeId); r.tipAmount=round2(r.tipAmount+per); r.daysWorked++; r.daily.push({date,kind:'hb',share:per}); });
+    }
+
+    totalBoh=round2(totalBoh + dailyBohPool);
+    totalHb=round2(totalHb + dailyHbPool);
+  });
+
+  // Totals:
+  for(const r of results.values()){
+    totalServer=round2(totalServer + (r.department==='FOH'? r.tipAmount : 0));
+    totalBase=round2(totalBase + r.baseTips);
+    totalOrig=round2(totalOrig + r.originalTips);
+    totalCc=round2(totalCc + r.ccFees);
   }
 
-  // ---------- Helpers ----------
-  function escapeHTML(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
-  function downloadBlob(text, filename, type){
-    const blob = new Blob([text], {type}); const a=document.createElement('a')
-    a.href = URL.createObjectURL(blob); a.download = filename; a.click()
-    setTimeout(()=>URL.revokeObjectURL(a.href), 1000)
-  }
-  function titleCase(s){ return String(s||'').split(' ').map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ') }
+  S.distributions=[...results.values()];
+  S.analytics={totalDistributed: round2(totalServer + totalBoh + totalHb), serverKeeps:totalServer, bohPool:totalBoh, hbPool:totalHb, baseTips:totalBase, originalTips:totalOrig, ccFees:totalCc, employeesPaid:S.distributions.filter(d=>d.tipAmount>0).length };
+  save();
+}
 
-  // ---------- Init ----------
-  setStep(state.step || 'upload')
-})();
+/* ===== Calculator UI ===== */
+function renderCalc(){
+  const cfg=S.settings;
+  // bind inputs
+  $('#setBohPct').value=cfg.bohPct; $('#setHbPct').value=cfg.hbPct; $('#setHbBasis').value=cfg.hbBasis;
+  $('#setCcPct').value=cfg.ccPct; $('#setCcApply').value=cfg.ccApply;
+  $('#setIncludeGrat').value=cfg.includeGrat; $('#setWithholdPct').value=cfg.withholdPct;
+  $('#btnPresetFohBoh').onclick=()=>{ $('#setHbPct').value=0; };
+  $('#btnApply').onclick=()=>{
+    S.settings={
+      bohPct:Number($('#setBohPct').value)||0,
+      hbPct:Number($('#setHbPct').value)||0,
+      hbBasis:$('#setHbBasis').value,
+      ccPct:Number($('#setCcPct').value)||0,
+      ccApply:$('#setCcApply').value,
+      includeGrat:$('#setIncludeGrat').value,
+      withholdPct:Number($('#setWithholdPct').value)||0
+    }; save(); calcTips(); renderCalc();
+  };
+  $('#btnPrintPolicy').onclick=()=>{ window.print(); };
+
+  const b=cfg;
+  $('#badgeRule').textContent=`Rule: BOH ${b.bohPct}% | HB ${b.hbPct}% (${b.hbBasis==='postBOH'?'after BOH':'of base'}) | CC ${b.ccPct}% ${b.ccApply}`;
+
+  // analytics
+  const A=S.analytics||{totalDistributed:0,serverKeeps:0,bohPool:0,hbPool:0,baseTips:0,originalTips:0,ccFees:0,employeesPaid:0};
+  $('#analytics').innerHTML=`
+    <div class="stat"><div class="lbl">Total Distributed</div><div class="val">${money(A.totalDistributed)}</div></div>
+    <div class="stat"><div class="lbl">Server Keeps</div><div class="val">${money(A.serverKeeps)}</div></div>
+    <div class="stat"><div class="lbl">BOH Pool</div><div class="val">${money(A.bohPool)}</div></div>
+    <div class="stat"><div class="lbl">Host/Busser Pool</div><div class="val">${money(A.hbPool)}</div></div>
+    <div class="stat"><div class="lbl">Total Tip Base (tips + grat − w/h)</div><div class="val">${money(A.baseTips)}</div></div>
+    <div class="stat"><div class="lbl">Original Tips</div><div class="val">${money(A.originalTips)}</div></div>
+    <div class="stat"><div class="lbl">CC Fees Total</div><div class="val">${money(A.ccFees)}</div></div>
+    <div class="stat"><div class="lbl">Employees Paid</div><div class="val">${A.employeesPaid}</div></div>
+  `;
+
+  // tabs
+  $$('#tabs-scope .tab').forEach(t=>t.classList.toggle('active',t.dataset.view===S.ui.view));
+  $$('#tabs-scope .tab').forEach(t=>t.onclick=()=>{ S.ui.view=t.dataset.view; save(); showTables(); });
+
+  $('#btnExport').onclick=()=>exportCurrentView();
+  $('#btnPrintFoh').onclick=()=>printView('foh');
+  $('#btnPrintBoh').onclick=()=>printView('boh');
+  $('#btnPrintAll').onclick=()=>printView('all');
+  $('#btnArchive').onclick=saveArchive;
+
+  showTables();
+}
+
+function showTables(){
+  const view=S.ui.view||'foh';
+  $('#tblFOH').classList.toggle('hidden',view!=='foh');
+  $('#tblBOH').classList.toggle('hidden',view!=='boh');
+  $('#tblALL').classList.toggle('hidden',view!=='all');
+  const data=S.distributions||[];
+  const FOH=data.filter(d=>d.department==='FOH');
+  const BOH=data.filter(d=>d.department==='BOH');
+  renderTable('#tblFOH', FOH);
+  renderTable('#tblBOH', BOH);
+  renderTable('#tblALL', data);
+}
+
+function renderTable(sel,rows){
+  const tbl=$(sel);
+  tbl.innerHTML=`
+    <tr>
+      <th>Employee Name</th><th>Role</th><th>Days</th>
+      <th>Tip Amount ▾</th><th>Base Tips</th>
+      <th>Original Tips</th><th>BOH Contrib</th><th>HB Contrib</th><th>CC Fees</th>
+    </tr>
+    ${rows.map(r=>`
+      <tr data-id="${r.employeeId}" class="r">
+        <td>${escape(r.employeeName)}</td>
+        <td><span class="pill">${r.role}</span></td>
+        <td>${r.daysWorked||0}</td>
+        <td>${money(r.tipAmount)}</td>
+        <td>${r.baseTips?money(r.baseTips):'N/A'}</td>
+        <td>${r.originalTips?money(r.originalTips):'N/A'}</td>
+        <td>${r.bohContribution?money(r.bohContribution):'N/A'}</td>
+        <td>${r.hbContribution?money(r.hbContribution):'N/A'}</td>
+        <td>${r.ccFees?money(r.ccFees):'$0.00'}</td>
+      </tr>
+      <tr class="hidden" id="d_${r.employeeId}"><td colspan="9">${renderDetail(r)}</td></tr>
+    `).join('')}
+  `;
+  tbl.querySelectorAll('tr.r').forEach(tr=>{
+    tr.onclick=()=>{
+      const id=tr.dataset.id;
+      $('#d_'+id)?.classList.toggle('hidden');
+    };
+  });
+}
+function renderDetail(r){
+  const lines=r.daily||[];
+  if(r.role==='server'){
+    return `<div class="grid cols-1">
+      <table>
+        <tr><th>Date</th><th>Base</th><th>Server Keeps</th><th>BOH</th><th>HB</th><th>CC</th><th>Tips</th><th>Gratuity</th><th>Withheld</th></tr>
+        ${lines.filter(x=>x.kind==='server').map(x=>`<tr><td>${x.date}</td><td>${money(x.base)}</td><td>${money(x.serverKeep)}</td><td>${money(x.boh)}</td><td>${money(x.hb)}</td><td>${money(x.cc)}</td><td>${money(x.tips)}</td><td>${money(x.grat||0)}</td><td>${money(x.withheld||0)}</td></tr>`).join('')}
+      </table>
+    </div>`;
+  }
+  if(r.department==='BOH'){
+    return `<table><tr><th>Date</th><th>Tier</th><th>Share</th></tr>
+      ${lines.filter(x=>x.kind==='boh').map(x=>`<tr><td>${x.date}</td><td>${x.tier}</td><td>${money(x.share)}</td></tr>`).join('')}
+    </table>`;
+  }
+  // HB
+  return `<table><tr><th>Date</th><th>HB Share</th></tr>
+    ${lines.filter(x=>x.kind==='hb').map(x=>`<tr><td>${x.date}</td><td>${money(x.share)}</td></tr>`).join('')}
+  </table>`;
+}
+
+/* ===== Exports / Print / Archive ===== */
+function exportCurrentView(){
+  const view=S.ui.view;
+  const rows=(view==='foh')? S.distributions.filter(x=>x.department==='FOH')
+           : (view==='boh')? S.distributions.filter(x=>x.department==='BOH')
+           : S.distributions;
+  const head=['Employee Name','Role','Days Worked','Tip Amount','Base Tips','Original Tips','BOH Contribution','HB Contribution','CC Fees'];
+  const csv=[head.join(',')].concat(rows.map(r=>[
+    `"${r.employeeName.replace(/"/g,'""')}"`, r.role, r.daysWorked, r.tipAmount.toFixed(2),
+    r.baseTips?r.baseTips.toFixed(2):'', r.originalTips?r.originalTips.toFixed(2):'',
+    r.bohContribution?r.bohContribution.toFixed(2):'', r.hbContribution?r.hbContribution.toFixed(2):'',
+    r.ccFees?r.ccFees.toFixed(2):'0.00'
+  ].join(','))).join('\n');
+  downloadFile(`tip-distribution-${S.payPeriodStart||'start'}-${S.payPeriodEnd||'end'}-${view}.csv`, csv);
+}
+function printView(view){
+  const data=(view==='foh')? S.distributions.filter(x=>x.department==='FOH')
+           : (view==='boh')? S.distributions.filter(x=>x.department==='BOH')
+           : S.distributions;
+  const area=$('#printArea'); area.innerHTML='';
+  const card=document.createElement('div'); card.className='card';
+  const title=`Mukja Tip Report — ${view.toUpperCase()} — ${S.payPeriodStart} → ${S.payPeriodEnd}`;
+  card.innerHTML=`<div class="hd"><h2>${title}</h2></div>
+  <div class="bd"><table>
+    <tr><th>Employee</th><th>Role</th><th>Days</th><th>Tip Amount</th><th>Base</th><th>Orig</th><th>BOH Contrib</th><th>HB Contrib</th></tr>
+    ${data.map(r=>`<tr><td>${escape(r.employeeName)}</td><td>${r.role}</td><td>${r.daysWorked}</td><td>${money(r.tipAmount)}</td><td>${r.baseTips?money(r.baseTips):''}</td><td>${r.originalTips?money(r.originalTips):''}</td><td>${r.bohContribution?money(r.bohContribution):''}</td><td>${r.hbContribution?money(r.hbContribution):''}</td></tr>`).join('')}
+  </table></div>`;
+  area.appendChild(card);
+  area.classList.remove('hidden');
+  window.print();
+  area.classList.add('hidden');
+}
+function saveArchive(){
+  const snap={ when:new Date().toISOString(), start:S.payPeriodStart, end:S.payPeriodEnd, settings:S.settings, analytics:S.analytics, distributions:S.distributions };
+  const arr=getArchives(); arr.unshift(snap); putArchives(arr);
+  alert('Saved to archive.');
+}
+function renderArchives(){
+  const arr=getArchives();
+  const tbl=$('#tblArchives');
+  if(!arr.length){ tbl.innerHTML='<tr><td>No archives yet.</td></tr>'; return; }
+  tbl.innerHTML='<tr><th>When</th><th>Period</th><th>Total Distributed</th><th>Employees</th><th></th></tr>'+
+    arr.map((a,i)=>`<tr><td>${a.when.slice(0,19).replace('T',' ')}</td><td>${a.start} → ${a.end}</td><td>${money(a.analytics?.totalDistributed||0)}</td><td>${a.analytics?.employeesPaid||0}</td><td><button class="btn gray" data-i="${i}">Load</button></td></tr>`).join('');
+  tbl.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>{
+    const a=arr[+b.dataset.i];
+    S.settings=a.settings; S.analytics=a.analytics; S.distributions=a.distributions;
+    S.payPeriodStart=a.start; S.payPeriodEnd=a.end;
+    save(); setStep('calc');
+  });
+}
+
+/* ===== Helpers ===== */
+function downloadFile(name,content){
+  const a=document.createElement('a'); a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(content); a.download=name; a.click();
+}
+
+/* ===== Reset ===== */
+$('#btnResetAll').onclick=()=>{ if(confirm('Start Over? This clears the current run (archives remain).')){ localStorage.removeItem(STATE_KEY); S=JSON.parse(localStorage.getItem(STATE_KEY)||'null') || {step:'upload',employees:[],workDays:[],payPeriodStart:'',payPeriodEnd:'',distributions:[],settings:{bohPct:30,hbPct:10,hbBasis:'original',ccPct:0,ccApply:'after',includeGrat:'yes',withholdPct:3},ui:{view:'foh'}}; setStep('upload'); } };
+
+/* ===== Init ===== */
+setStep(S.step||'upload');
+if(S.distributions?.length && S.step==='calc'){ renderCalc(); }
 </script>
 </body>
 </html>
