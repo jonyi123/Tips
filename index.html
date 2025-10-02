@@ -2,765 +2,445 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<title>Mukja — Tip Payout Calculator (with Visual Day Sampler)</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mukja — Tip Payout Calculator</title>
 <style>
-  :root{--blue:#2563eb;--green:#16a34a;--purple:#8b5cf6;--red:#dc2626;--amber:#f59e0b;--gray:#6b7280;--bg:#f8fafc}
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#111827}
-  .layout{display:flex;min-height:100vh}
-  .sidebar{width:260px;background:#fff;border-right:1px solid #e5e7eb;padding:16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:10px}
-  .brand{font-weight:900;font-size:20px;margin-bottom:4px}
-  .nav a{display:flex;align-items:center;gap:8px;text-decoration:none;color:#111827;padding:10px;border-radius:10px;margin:4px 0}
-  .nav a:hover{background:#f3f4f6}
-  .nav a.active{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-  .nav a.locked{opacity:.45;pointer-events:none}
-  .nav .check{margin-left:auto;color:var(--green)}
-  .main{flex:1;padding:22px}
-  .container{max-width:1200px;margin:0 auto}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 10px 22px rgba(0,0,0,.04);margin-bottom:14px}
-  .card .hd{padding:12px 14px;border-bottom:1px solid #e5e7eb}
-  .card .bd{padding:14px}
-  .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;background:var(--blue);color:#fff}
-  .btn.green{background:var(--green)} .btn.purple{background:var(--purple)} .btn.red{background:var(--red)} .btn.gray{background:#e5e7eb;color:#111827}
-  .btn[disabled]{opacity:.5;cursor:not-allowed}
-  .row{display:flex;align-items:center;gap:10px}
-  .right{display:flex;justify-content:flex-end;gap:8px}
-  .grid{display:grid;gap:10px}
-  .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .field{display:flex;flex-direction:column;gap:6px}
-  .field label{font-size:12px;color:#6b7280}
-  input[type="text"],input[type="number"],select{width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px;background:#fff}
-  .drop{border:2px dashed #d1d5db;border-radius:14px;padding:22px;text-align:center;background:#f9fafb}
-  .drop.drag{background:#eff6ff;border-color:#93c5fd}
-  .chip{border:1px solid #e5e7eb;background:#f3f4f6;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800}
-  .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:800}
-  .b-blue{background:#dbeafe;color:#1d4ed8}
-  .stat{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px}
-  .stat .lbl{color:#6b7280;font-size:12px} .stat .val{font-weight:900;font-size:18px}
-  table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left;font-size:14px}
-  th{background:#f9fafb;font-weight:900;cursor:pointer;user-select:none}
-  .pill{display:inline-flex;border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;font-size:12px}
-  .cell-btn{width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f3f4f6;display:inline-flex;justify-content:center;align-items:center;font-weight:900}
-  .cell-btn.on{background:#2563eb;color:#fff;border-color:#1d4ed8}
-  .hidden{display:none!important} .muted{color:#6b7280}
-  details{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:8px}
-  .tabs{display:flex;gap:8px} .tab{padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;cursor:pointer} .tab.active{background:#e0e7ff;border-color:#c7d2fe}
-  .switch{display:inline-flex;align-items:center;gap:8px}
-  .sidebar .bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px}
-  .exp{background:#fbfbff;border:1px dashed #e5e7eb;border-radius:10px;padding:10px;margin:8px 0}
-  @media print{ body{background:#fff} .sidebar,.main>.container>*:not(.print-area){display:none!important} .print-area{display:block!important} .print-area .card{border:none;box-shadow:none} }
+  :root{
+    --bg:#0f172a;--panel:#0b1220;--muted:#94a3b8;--text:#e5e7eb;
+    --blue:#3b82f6;--green:#22c55e;--purple:#8b5cf6;--red:#ef4444;--amber:#f59e0b;
+    --bd1:rgba(255,255,255,.10);--bd2:rgba(255,255,255,.06);
+    --w-name:260px;--w-col:120px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+  .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+  aside{background:var(--panel);border-right:1px solid var(--bd1);padding:16px 14px}
+  .brand{font-weight:800;font-size:22px;margin:2px 4px 14px}
+  .nav button{width:100%;text-align:left;background:transparent;color:var(--text);
+    border:1px solid var(--bd1);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer}
+  .nav button.active{background:#101827;border-color:var(--blue);box-shadow:0 0 0 1px rgba(59,130,246,.35) inset}
+  .small{color:var(--muted);font-size:12px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:10px;padding:9px 14px;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid var(--bd1);color:var(--text)}
+  .btn.red{background:var(--red)} .btn.purple{background:var(--purple)} .btn.green{background:var(--green)} .btn.amber{background:var(--amber)}
+  main{padding:18px}
+  h1{margin:0 0 12px;font-size:26px} h2{margin:10px 0 8px;font-size:18px}
+  .row{display:flex;gap:12px;flex-wrap:wrap} .col{flex:1 1 260px}
+  .card{background:#0e1728;border:1px solid var(--bd1);border-radius:12px;padding:14px}
+  input,select{background:#0d1628;border:1px solid var(--bd1);color:var(--text);padding:8px 10px;border-radius:10px;min-width:80px}
+  label{display:flex;flex-direction:column;gap:6px;font-size:14px}
+  .help{font-size:12px;color:var(--muted)}
+  .pill{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+  .pill button{background:#0c1628;border:1px solid var(--bd1);color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer}
+  .pill button.active{background:#17325e;border-color:var(--blue)}
+  table{width:100%;border-collapse:separate;border-spacing:0}
+  th,td{padding:10px;border-bottom:1px solid var(--bd2)}
+  thead th{position:sticky;top:0;background:#0e1728;color:#cbd5e1;text-align:left;z-index:1;cursor:pointer}
+  tr:hover{background:#0b1323}
+  .right{text-align:right}.mono{font-variant-numeric:tabular-nums}
+  .badge{background:#0f2137;border:1px solid var(--bd2);color:#c7d2fe;font-size:11px;padding:2px 8px;border-radius:999px}
+  .detailCell{padding:0 !important;background:#0b1323} .detailBox{padding:10px}
+  .detailHead,.detailRow{display:grid;column-gap:10px;align-items:center;grid-template-columns:var(--w-name) repeat(7,var(--w-col));padding:8px 10px}
+  .detailHead{color:#cbd5e1;background:#0e1728}
+  .gridRow{display:grid;grid-template-columns:280px repeat(14,28px);gap:6px;align-items:center}
+  .dayCell{width:28px;height:28px;border-radius:6px;border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .dayCell.on{background:#17325e;border-color:#2957aa}
+  .legend{display:flex;gap:8px;align-items:center}.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .dot.on{background:#2957aa;border:1px solid #2957aa}.dot.off{background:transparent;border:1px solid var(--bd2)}
+  .rowbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .hide{display:none}
+  /* GUIDE drawer */
+  #guideTab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:99;writing-mode:vertical-rl;text-orientation:upright;background:#17325e;border:1px solid #2957aa;color:#e5e7eb;border-radius:10px 0 0 10px;padding:10px 6px;cursor:pointer}
+  #guide{position:fixed;right:0;top:0;height:100dvh;width:420px;background:#0b1220;border-left:1px solid var(--bd1);box-shadow:-12px 0 24px rgba(0,0,0,.35);z-index:98;transform:translateX(100%);transition:transform .25s ease}
+  #guide.open{transform:none} #guide .gHead{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--bd1)} #guide .gBody{padding:12px;overflow:auto;height:calc(100% - 56px)}
+  /* Sampler badges */
+  .chip{display:inline-block;border:1px solid var(--bd2);border-radius:999px;padding:4px 10px;font-size:12px;margin:4px 6px 0 0}
+  .chip.purple{background:#281d52;border-color:#3f2d7a}
+  .chip.green{background:#163a2a;border-color:#1f6f50}
+  .chip.blue{background:#102746;border-color:#163a6f}
+  .outline{border:1px dashed var(--bd1);border-radius:10px;padding:8px}
 </style>
 </head>
 <body>
-<div class="layout">
-  <aside class="sidebar">
-    <div>
-      <div class="brand">Mukja <span class="muted" style="font-weight:600">Tip Calculator</span></div>
-      <nav class="nav">
-        <a id="nav-upload" class="active">📄 CSV Upload <span class="check" id="check-upload"></span></a>
-        <a id="nav-review" class="locked">👥 Employee Review <span class="check" id="check-review"></span></a>
-        <a id="nav-attendance" class="locked">📅 Calendar Attendance <span class="check" id="check-att"></span></a>
-        <a id="nav-calc" class="locked">💰 Tip Calculator <span class="check" id="check-calc"></span></a>
-        <a id="nav-archives">🗂 Archives</a>
-      </nav>
+<!-- Right GUIDE drawer -->
+<div id="guideTab">GUIDE</div>
+<div id="guide">
+  <div class="gHead">
+    <div><b>Tip Split Guide</b></div>
+    <button id="guideClose" class="btn ghost">Close</button>
+  </div>
+  <div class="gBody">
+    <h3>Daily-first math (per server)</h3>
+    <ol>
+      <li><b>Base</b> = Tips + (include Gratuity?) − (Exclude Withheld? use CSV or %)</li>
+      <li><b>CC Fee</b> (if “before”): subtract from base</li>
+      <li><b>BOH</b> = <i>BOH %</i> of base</li>
+      <li><b>HB</b> = <i>HB %</i> of <i>HB Basis</i> (remaining after BOH, or original base)</li>
+      <li><b>Server keeps</b> = base − BOH − HB (then CC Fee “after”, if selected)</li>
+    </ol>
+    <p class="help">HB recipients = Host + Busser who worked that day (equal split). BOH tiers (per day) = Lead 50% (Cook/Prep/Meat), Assist 35% (Cook/Prep/Meat Assist), Dishwasher 15%; equal within tier. Missing recipients → pool returns proportionally to servers who generated it.</p>
+  </div>
+</div>
+
+<div class="app">
+  <aside>
+    <div class="brand">Mukja</div>
+    <div class="nav">
+      <button data-view="upload" class="active">📄 CSV Upload</button>
+      <button data-view="calc">💰 Tip Calculator</button>
+      <button data-view="attendance">📅 Attendance</button>
+      <button data-view="help">❓ Help & Workflow</button>
+      <button data-view="archives">📁 Archives</button>
     </div>
-    <div class="bottom">
-      <button id="btnResetAll" class="btn gray">Start Over</button>
-      <div class="muted" style="font-size:12px">Client-side only. Data persists to your browser.</div>
+    <div class="small" style="margin-top:10px">State is saved locally.</div>
+    <div class="row" style="margin-top:10px">
+      <button id="btnReset" class="btn red" style="flex:1 1 100px">Start Over</button>
+      <button id="btnSave" class="btn ghost" style="flex:1 1 100px">Export State</button>
+      <button id="btnLoad" class="btn ghost" style="flex:1 1 100px">Import State</button>
     </div>
   </aside>
 
-  <main class="main"><div class="container">
-
-    <!-- Upload -->
-    <section id="screen-upload">
-      <div class="card"><div class="hd"><h2>CSV Upload</h2><div class="muted">Drop your Toast CSV. We normalize, validate, and process.</div></div>
-      <div class="bd">
-        <div id="dropzone" class="drop">
-          <div>Drop CSV here or</div>
-          <input type="file" id="csvInput" accept=".csv"/>
-          <div id="fileName" class="muted" style="margin-top:8px"></div>
-        </div>
-        <div id="stage" class="row hidden" style="margin-top:10px"><div class="chip" id="stageChip">Parsing…</div><div id="stageText" class="muted"></div></div>
-        <div id="warnBox" class="card hidden" style="border-left:6px solid var(--amber)"></div>
-        <div id="errBox" class="card hidden" style="border-left:6px solid var(--red)"></div>
-        <div class="right" style="margin-top:8px">
-          <button class="btn gray" id="btnTemplate">Download Template</button>
-          <button class="btn red" id="btnClearUpload">Clear Upload</button>
-        </div>
-      </div></div>
-      <div class="card"><div class="hd"><h3>How to export from Toast POS</h3></div>
-      <div class="bd"><ol>
-        <li>Reports → Payroll → Payroll Export</li><li>Select the 14-day period</li><li>Download CSV</li><li>Upload above</li>
-      </ol></div></div>
-    </section>
-
-    <!-- Review -->
-    <section id="screen-review" class="hidden">
-      <div class="card"><div class="hd"><h2>Review Employees</h2><div class="muted">Fix departments/roles for correct pools. Multiple roles per person are supported.</div></div>
-      <div class="bd">
-        <div class="row" style="gap:8px;margin-bottom:8px">
-          <span class="badge b-blue" id="stat-emps">Employees: 0</span>
-          <span class="badge" style="background:#fffbeb;color:#92400e" id="stat-warns">Warnings: 0</span>
-          <span class="badge" style="background:#fee2e2;color:#991b1b" id="stat-errs">Errors: 0</span>
-        </div>
-        <div id="valSummary"></div>
-      </div></div>
-      <div id="empGrid" class="grid cols-2"></div>
-      <div class="right"><button class="btn" id="toAttendance">Continue to Attendance →</button></div>
-    </section>
-
-    <!-- Attendance -->
-    <section id="screen-attendance" class="hidden">
-      <div class="card"><div class="hd"><h2>Calendar Attendance</h2><div class="muted">Pay Period: <span id="ppStart">—</span> → <span id="ppEnd">—</span></div></div>
-      <div class="bd">
-        <div class="grid cols-4">
-          <div class="stat"><div class="lbl">Total Employees (positions)</div><div class="val" id="stEmp">0</div></div>
-          <div class="stat"><div class="lbl">Days Worked</div><div class="val" id="stDays">0</div></div>
-          <div class="stat"><div class="lbl">Attendance Rate</div><div class="val" id="stRate">0%</div></div>
-          <div class="stat"><div class="lbl">Missing Records</div><div class="val" id="stMiss">0</div></div>
-        </div>
-      </div></div>
-      <div class="card"><div class="hd"><h3>Mark days worked</h3></div><div class="bd"><div style="overflow:auto"><table id="attTable"></table></div></div></div>
-      <div class="right"><button class="btn" id="toCalc">Continue to Tip Calculator →</button></div>
-    </section>
-
-    <!-- Calculator -->
-    <section id="screen-calc" class="hidden">
-      <div class="card"><div class="hd"><h2>Tip Calculator</h2><div class="muted">Daily-first math (60/10/30 of base by default) + BOH tiers (50/35/15). Drill down for per-day details.</div></div>
-      <div class="bd">
-        <details id="settings">
-          <summary><b>⚙️ Settings (tap to open)</b></summary>
-          <div class="grid cols-4" style="margin-top:8px">
-            <div class="field"><label>BOH % of base</label><input id="setBohPct" type="number" step="0.01" min="0" max="100"/></div>
-            <div class="field"><label>Host/Busser % (HB)</label><input id="setHbPct" type="number" step="0.01" min="0" max="100"/></div>
-            <div class="field"><label>HB Basis</label><select id="setHbBasis"><option value="original">of base (original)</option><option value="postBOH">of (base − BOH)</option></select></div>
-            <div class="field"><label>Credit Card Fee %</label><input id="setCcPct" type="number" step="0.01" min="0" max="100"/></div>
+  <main>
+    <!-- UPLOAD -->
+    <section id="v-upload">
+      <h1>CSV Upload</h1>
+      <div class="row">
+        <div class="col card">
+          <div class="rowbar">
+            <h2>Upload Toast Payroll CSV</h2>
+            <div class="help">Auto-maps & auto-calculates. No manual mapping.</div>
           </div>
-          <div class="grid cols-3" style="margin-top:8px">
-            <div class="field"><label>CC Fee Application</label>
-              <select id="setCcApply"><option value="after">Deduct from server keep (after splits)</option><option value="before">Deduct before splits (reduces pools)</option></select>
-            </div>
-            <div class="field"><label>Include Gratuity in base?</label>
-              <select id="setIncludeGrat"><option value="yes">YES — add Gratuity to base</option><option value="no">NO — ignore Gratuity</option></select>
-            </div>
-            <div class="field"><label>Withholding % (before splits)</label><input id="setWithholdPct" type="number" step="0.01" min="0" max="100"/></div>
+          <div id="drop" class="card" style="background:#0d1628;border:1px dashed var(--bd1);text-align:center;padding:14px">
+            <div>Drag & drop CSV here, or</div>
+            <div style="margin-top:8px"><input id="fileInput" type="file" accept=".csv"/></div>
           </div>
-          <div class="row" style="justify-content:space-between;margin-top:8px">
-            <div class="row" style="gap:8px;flex-wrap:wrap">
-              <span class="badge b-blue" id="badgeRule"></span>
-              <button class="btn gray" id="btnPresetFohBoh" title="Set HB% = 0">Preset: FOH/BOH only</button>
-            </div>
+          <div id="autoMap" class="help" style="margin-top:8px"></div>
+          <div id="uploadStatus" class="help"></div>
+          <div class="pill"><button id="btnUseSample" class="btn ghost">Load Sample</button><button id="btnGoCalc" class="btn">Go to Calculator</button></div>
+        </div>
+        <div class="col card">
+          <h2>Quick Rules</h2>
+          <ul class="help" style="line-height:1.5">
+            <li>Defaults: <b>BOH 30%</b>, <b>HB 10%</b>, <b>HB Basis = remaining after BOH</b> (sequential)</li>
+            <li>Gratuity included; Withheld excluded; CC fee 3% <i>after keeps</i></li>
+            <li>Per-day pools split only to workers who worked that day</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALC -->
+    <section id="v-calc" class="hide">
+      <h1>Tip Calculator</h1>
+      <details id="settings" class="card" open>
+        <summary><b>⚙️ Settings (tap to open)</b></summary>
+        <div class="row" style="margin-top:8px">
+          <label class="col">BOH % <input id="sBohPct" type="number" min="0" max="100" step="1" value="30" /></label>
+          <label class="col">HB % <input id="sHbPct" type="number" min="0" max="100" step="1" value="10" /></label>
+          <label class="col">HB Basis
+            <select id="sHbBasis">
+              <option value="remaining" selected>of remaining after BOH (sequential)</option>
+              <option value="original">of base (original)</option>
+            </select>
+          </label>
+          <label class="col">Include Gratuity in base?
+            <select id="sGrat"><option value="yes" selected>YES — add Gratuity</option><option value="no">NO</option></select>
+          </label>
+          <label class="col">Exclude Withheld?
+            <select id="sWithheld"><option value="yes" selected>YES — subtract mapped Withheld from base</option><option value="no">NO</option></select>
+          </label>
+          <label class="col">Withholding % (fallback if no column)
+            <input id="sWithholdPct" type="number" min="0" max="100" step="0.1" value="0" />
+          </label>
+          <label class="col">Credit Card Fee %
+            <input id="sCcPct" type="number" min="0" max="100" step="0.1" value="3" />
+          </label>
+          <label class="col">CC Fee Applied
+            <select id="sCcMode">
+              <option value="after" selected>after (from server keeps)</option>
+              <option value="before">before (reduce base)</option>
+              <option value="none">none</option>
+            </select>
+          </label>
+          <label class="col">FOH_PAYOUT_POLICY
+            <select id="sFoh">
+              <option value="ServerKeeps" selected>ServerKeeps (default)</option>
+              <option value="PoolEqual">PoolEqual (servers/expo split equally)</option>
+            </select>
+          </label>
+          <label class="col">BOH Tiers (Lead,Assist,Dish)
+            <input id="sBohTiers" type="text" value="50,35,15" />
+          </label>
+          <label class="col">Dates inside pay period only
             <div class="row">
-              <button class="btn green" id="btnApply">Apply & Recalculate</button>
-              <button class="btn gray" id="btnPrintPolicy">Print Policy</button>
+              <input id="sStart" type="date" />
+              <input id="sEnd" type="date" />
+            </div>
+          </label>
+        </div>
+        <button id="btnApply" class="btn green" style="margin-top:8px">Apply & Recalculate</button>
+      </details>
+
+      <div class="row">
+        <div class="col card">
+          <div class="rowbar">
+            <h2>Totals</h2>
+            <div class="pill">
+              <button id="btnExport" class="btn">Export CSV</button>
+              <button id="btnPrint" class="btn purple">Print</button>
+              <button id="btnArchive" class="btn amber">Save to Archive</button>
             </div>
           </div>
-
-          <div class="exp">
-            <h4 style="margin:6px 0 4px 0">Tip Policy — Plain English</h4>
-            <ol style="margin:0 0 6px 18px">
-              <li><b>Daily-first.</b> We process each calendar day separately, then sum the period.</li>
-              <li><b>Base tips</b> = <i>Tips</i> + <i>Gratuity</i> − <i>Withholding</i> (3% default, before splits).</li>
-              <li>From each <b>server’s base</b> that day: <b>BOH</b> gets <b>30%</b>, <b>HB</b> gets <b>10%</b> (basis configurable), and the <b>server keeps the rest</b>. All are from the same base (not sequential), unless HB is set to “of (base − BOH)”.</li>
-              <li><b>Only staff who worked that day</b> receive that day’s pools.</li>
-              <li><b>BOH tiers</b> split the day’s BOH pool: Lead 50% (Cook/Meat/Prep), Assist 35% (Cook/Meat/Prep Assist), Dishwasher 15%.</li>
-              <li><b>Rounding:</b> After every step (to cents).</li>
-              <li><b>Credit card fee</b> can be taken <b>before</b> (reduces base/pools) or <b>after</b> (reduces server keep only).</li>
-              <li>For FOH/BOH-only: set <b>HB % = 0</b> (use the preset).</li>
-            </ol>
-            <div style="font-size:13px">
-              <b>Worked Example:</b> Tips $100, Gratuity $20, Withholding 3%, BOH 30%, HB 10% of base, CC 0% after.<br/>
-              Base = (100+20) − 3%×120 = <b>$116.40</b><br/>
-              BOH 30% = <b>$34.92</b>; HB 10% = <b>$11.64</b>; Server keeps = <b>$69.84</b>.
-            </div>
-          </div>
-        </details>
-
-        <div id="analytics" class="grid cols-4" style="margin-top:10px"></div>
-
-        <div class="row" style="justify-content:space-between;margin-top:8px">
-          <div class="tabs" id="tabs-scope">
-            <div class="tab active" data-view="foh">FOH</div>
-            <div class="tab" data-view="boh">BOH</div>
-            <div class="tab" data-view="all">ALL</div>
-          </div>
-          <div class="row">
-            <button class="btn" id="btnExport">Export CSV (current view)</button>
-            <button class="btn purple" id="btnPrintFoh">Print FOH Report</button>
-            <button class="btn purple" id="btnPrintBoh">Print BOH Report</button>
-            <button class="btn purple" id="btnPrintAll">Print ALL Report</button>
-            <button class="btn green" id="btnArchive">Save to Archive</button>
+          <div class="row" style="gap:10px;flex-wrap:wrap">
+            <div class="card" style="flex:1 1 160px"><div>Total Distributed</div><div id="k-total" class="mono" style="font-weight:800;font-size:18px">$0.00</div></div>
+            <div class="card" style="flex:1 1 160px"><div id="k-keep-label">Server Keeps</div><div id="k-keeps" class="mono" style="font-weight:800;font-size:18px">$0.00</div></div>
+            <div class="card" style="flex:1 1 160px"><div>BOH Pool</div><div id="k-boh" class="mono" style="font-weight:800;font-size:18px">$0.00</div></div>
+            <div class="card" style="flex:1 1 160px"><div>HB Pool</div><div id="k-hb" class="mono" style="font-weight:800;font-size:18px">$0.00</div></div>
+            <div class="card" style="flex:1 1 160px"><div>Original Tips</div><div id="k-orig" class="mono" style="font-weight:800;font-size:18px">$0.00</div></div>
+            <div class="card" style="flex:1 1 160px"><div>CC Fees</div><div id="k-cc" class="mono" style="font-weight:800;font-size:18px">$0.00</div></div>
+            <div class="card" style="flex:1 1 160px"><div>Employees Paid</div><div id="k-emp" class="mono" style="font-weight:800;font-size:18px">0</div></div>
           </div>
         </div>
-      </div></div>
+      </div>
 
-      <div class="card"><div class="hd"><h3>Results (click a row to expand)</h3></div><div class="bd">
-        <table id="tblFOH"></table>
-        <table id="tblBOH" class="hidden"></table>
-        <table id="tblALL" class="hidden"></table>
-      </div></div>
+      <div class="pill" style="justify-content:space-between;align-items:center;margin-top:8px">
+        <div class="pill">
+          <button data-filter="ALL" class="active">ALL</button>
+          <button data-filter="FOH">FOH</button>
+          <button data-filter="BOH">BOH</button>
+        </div>
+      </div>
+
+      <div id="resultWrap" class="card" style="padding:0;margin-top:8px">
+        <table id="resultTbl">
+          <thead><tr>
+            <th data-sort="name" style="min-width:var(--w-name)">Name</th>
+            <th data-sort="roles">Role(s)</th>
+            <th data-sort="days" class="right">Days</th>
+            <th data-sort="tip" class="right">Tip Amount</th>
+            <th data-sort="orig" class="right">Original Tips</th>
+            <th data-sort="bohContrib" class="right">BOH Contrib</th>
+            <th data-sort="hbContrib" class="right">HB Contrib</th>
+          </tr></thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- Archives -->
-    <section id="screen-archives" class="hidden">
-      <div class="card"><div class="hd"><h2>Archives</h2><div class="muted">Saved runs are stored locally in your browser (no expiry).</div></div>
-      <div class="bd"><table id="tblArchives"></table></div>
+    <!-- ATTENDANCE -->
+    <section id="v-attendance" class="hide">
+      <h1>Calendar Attendance</h1>
+      <div class="help">Toggle any cell to mark worked (✓). Use “Add Person” for BOH/FOH not present in the CSV.</div>
+      <div class="pill"><button id="btnAddManual" class="btn ghost">+ Add Person</button><button id="btnClearManual" class="btn ghost">Clear Added</button></div>
+      <div id="attWrap" class="card"></div>
     </section>
 
-    <div id="printArea" class="print-area hidden"></div>
-  </div></main>
+    <!-- HELP (VISUAL DAY SAMPLER) -->
+    <section id="v-help" class="hide">
+      <h1>Help & Workflow</h1>
+      <div class="card">
+        <div class="rowbar">
+          <h2>Help & Visual Day Sampler</h2>
+          <div class="pill">
+            <button id="hPrint" class="btn ghost">🖨️ Print</button>
+            <button id="hBack" class="btn ghost">Back to Calculator</button>
+          </div>
+        </div>
+        <div class="help">Pick a real date from your upload, tweak settings, and see exactly how money flows that day. Color-coded for FOH/BOH.</div>
+
+        <!-- Controls -->
+        <div class="row outline" style="margin-top:8px">
+          <label class="col">Date
+            <select id="hDate"></select>
+          </label>
+          <label class="col">BOH %
+            <input id="hBohPct" type="number" min="0" max="100" step="1" />
+          </label>
+          <label class="col">HB %
+            <input id="hHbPct" type="number" min="0" max="100" step="1" />
+          </label>
+          <label class="col">HB Basis
+            <select id="hHbBasis">
+              <option value="remaining">of remaining after BOH</option>
+              <option value="original">of base (original)</option>
+            </select>
+          </label>
+          <label class="col">Withholding %
+            <input id="hWithholdPct" type="number" min="0" max="100" step="0.1" />
+          </label>
+          <label class="col">CC Fee %
+            <input id="hCcPct" type="number" min="0" max="100" step="0.1" />
+          </label>
+          <label class="col">CC Fee
+            <select id="hCcMode">
+              <option value="after">after (from keeps)</option>
+              <option value="before">before (reduce base)</option>
+              <option value="none">none</option>
+            </select>
+          </label>
+          <label class="col">Include Gratuity?
+            <select id="hGrat">
+              <option value="yes">YES</option>
+              <option value="no">NO</option>
+            </select>
+          </label>
+          <div style="display:flex;align-items:flex-end"><button id="hApply" class="btn" style="height:38px">Apply</button></div>
+        </div>
+
+        <!-- Cards -->
+        <div id="hCards" class="row" style="margin-top:10px"></div>
+
+        <!-- Training example -->
+        <div class="card" style="margin-top:10px">
+          <h3>Training Example ($100)</h3>
+          <div id="hTraining" class="mono"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARCHIVES -->
+    <section id="v-archives" class="hide">
+      <h1>Archives</h1>
+      <div id="archWrap" class="card"></div>
+    </section>
+  </main>
 </div>
 
 <script>
-/* ===== Utilities ===== */
-const $ = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
-const r2 = n => Math.round((Number(n)||0)*100)/100;
-const money = n => '$'+(r2(n)).toFixed(2);
-const title = s => String(s||'').split(' ').map(p=>p? p[0].toUpperCase()+p.slice(1):p).join(' ');
-const canon = s => String(s||'').trim().toLowerCase();
-const uid = () => Math.random().toString(36).slice(2,10);
-const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const escape = s => String(s).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/*** Shortcuts ***/
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const fmt=c=>'$'+((+c||0)/100).toFixed(2), num=v=>+String(v).replace(/[^\d.-]/g,'')||0, toCents=x=>Math.round((+x||0)*100);
+const FOH_ROLES=new Set(['server','host','busser','expo']), HB_ROLES=new Set(['host','busser']);
+const ROLE_TIER={'cook':'lead','prep':'lead','meat':'lead','cook assist':'assist','prep assist':'assist','meat assist':'assist','dishwasher':'dish'};
 
-/* ===== Persistence ===== */
-const STATE_KEY='mukja-v10';
-const ARCH_KEY='mukja-archives-v1';
-let S = JSON.parse(localStorage.getItem(STATE_KEY)||'null') || {
-  step:'upload',
-  employees:[], workDays:[],
-  payPeriodStart:'', payPeriodEnd:'',
-  distributions:[],
-  settings:{
-    bohPct:30, hbPct:10, hbBasis:'original',
-    ccPct:0, ccApply:'after',
-    includeGrat:'yes', withholdPct:3
-  },
-  ui:{view:'foh'}
-};
-const save = ()=>localStorage.setItem(STATE_KEY, JSON.stringify(S));
-const getArchives = ()=>JSON.parse(localStorage.getItem(ARCH_KEY)||'[]');
-const putArchives = arr=>localStorage.setItem(ARCH_KEY, JSON.stringify(arr));
+/*** GUIDE ***/
+$('#guideTab').onclick=()=>$('#guide').classList.add('open');
+$('#guideClose').onclick=()=>$('#guide').classList.remove('open');
 
-/* ===== Navigation ===== */
-const screens={upload:'#screen-upload',review:'#screen-review',attendance:'#screen-attendance',calc:'#screen-calc',archives:'#screen-archives'};
-function setStep(step){
-  S.step=step; save();
-  for(const k in screens){ $(screens[k]).classList.toggle('hidden',k!==step); }
-  $('#nav-upload').classList.toggle('active',step==='upload');
-  $('#nav-review').classList.toggle('active',step==='review');
-  $('#nav-attendance').classList.toggle('active',step==='attendance');
-  $('#nav-calc').classList.toggle('active',step==='calc');
-  $('#nav-archives').classList.toggle('active',step==='archives');
+/*** CSV parsing ***/
+function parseCSV(text){const rows=[];let i=0,f='',q=false,row=[];while(i<text.length){const c=text[i];if(q){if(c=='"'){if(text[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else{if(c=='"')q=true;else if(c==','){row.push(f);f=''}else if(c=='\n'){row.push(f);rows.push(row);f='';row=[]}else if(c!='\r')f+=c}i++}if(f.length||row.length){row.push(f);rows.push(row)}if(!rows.length)return[];const headers=rows[0].map(h=>h.trim());return rows.slice(1).filter(r=>r.some(x=>x&&x.trim().length)).map(r=>{const o={};headers.forEach((h,idx)=>o[h]=r[idx]??'');return o})}
+function toYmd(v){if(!v)return'';const s=String(v).trim();let m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return s;m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m){const[_,mm,dd,yy]=m;return`${yy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`}m=s.match(/^(\d{1,2})[-\s]([A-Za-z]{3,})$/);if(m){const mo={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};const mm=mo[m[2].slice(0,3).toLowerCase()]||1;const dd=+m[1];const yy=new Date().getFullYear();return`${yy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`}const d=new Date(s);if(!isNaN(d))return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return''}
+function pickHeader(h,ps,f=''){const a=h.map(x=>x.trim());for(const p of ps){const m=a.find(x=>p.test(x));if(m)return m}return f||a[0]||''}
+function normRole(raw){const s=(raw||'').toString().trim().toLowerCase(),has=a=>a.some(x=>s.includes(x));if(has(['server','waiter','waitress']))return'server';if(has(['hostess','host/hostess','host']))return'host';if(has(['bus','busser','bus boy','bus girl','busperson']))return'busser';if(has(['expo']))return'expo';if(has(['dishwash','dish washer','dish']))return'dishwasher';if(has(['cook lead','lead cook','kitchen lead']))return'cook';if(has(['meat lead','lead meat']))return'meat';if(has(['prep lead','lead prep']))return'prep';if(has(['assistant cook','cook assistant','cook assist','kitchen assistant']))return'cook assist';if(has(['assistant meat','meat assistant','meat assist']))return'meat assist';if(has(['assistant prep','prep assistant','prep assist']))return'prep assist';if(has(['cook']))return'cook';if(has(['meat']))return'meat';if(has(['prep']))return'prep';return s||''}
 
-  $('#nav-review').classList.toggle('locked',!S.employees.length);
-  $('#nav-attendance').classList.toggle('locked',!S.workDays.length);
-  $('#nav-calc').classList.toggle('locked',!S.distributions.length);
-  if(S.employees.length) $('#check-upload').textContent='✓';
-  if(S.workDays.length) $('#check-review').textContent='✓';
-  if(S.distributions.length) $('#check-att').textContent='✓';
+/*** STATE ***/
+let state={rows:[],dates:[],manual:[],range:{start:'',end:''},map:{},settings:{
+  bohPct:30,hbPct:10,hbBasis:'remaining',incGrat:true,exWithheld:true,withholdPct:0,ccPct:3,ccMode:'after',fohPolicy:'ServerKeeps',bohTiers:[50,35,15],start:'',end:''
+},archives:[]};
+function persist(){localStorage.setItem('mukja-v5',JSON.stringify(state))}
+function load(){try{const s=JSON.parse(localStorage.getItem('mukja-v5')||'null');if(s){state=Object.assign(state,s)}}catch{}hydrateSettings()}
+function hydrateSettings(){ $('#sBohPct').value=state.settings.bohPct;$('#sHbPct').value=state.settings.hbPct;$('#sHbBasis').value=state.settings.hbBasis;$('#sGrat').value=state.settings.incGrat?'yes':'no';$('#sWithheld').value=state.settings.exWithheld?'yes':'no';$('#sWithholdPct').value=state.settings.withholdPct;$('#sCcPct').value=state.settings.ccPct;$('#sCcMode').value=state.settings.ccMode;$('#sFoh').value=state.settings.fohPolicy;$('#sBohTiers').value=state.settings.bohTiers.join(',');$('#sStart').value=state.settings.start||state.range.start||'';$('#sEnd').value=state.settings.end||state.range.end||''}
 
-  if(step==='review') renderReview();
-  if(step==='attendance') renderAttendance();
-  if(step==='calc') renderCalc();
-  if(step==='archives') renderArchives();
+/*** UPLOAD ***/
+function handleUploadText(text){
+  $('#uploadStatus').textContent='Parsing…';
+  const raw=parseCSV(text); if(!raw.length){$('#uploadStatus').innerHTML='<span style="color:#ef4444">No rows found.</span>';return}
+  const headers=Object.keys(raw[0]);
+  const H={name:pickHeader(headers,[/(^|\s)(employee|name)(\s|$)/i],headers[0]),role:pickHeader(headers,[/job\s*title/i,/job\b/i,/title\b/i,/role\b/i],headers[1]||headers[0]),date:pickHeader(headers,[/(work|business).*date/i,/^date$/i,/open\s*date/i],headers[2]||headers[0]),hours:pickHeader(headers,[/regular.*hours/i,/reg.*hrs/i,/hours\b/i,/hrs\b/i],''),tips:pickHeader(headers,[/total\s*tips/i,/cc.*tips/i,/tips\b/i],''),grat:pickHeader(headers,[/gratu/i],''),withheld:pickHeader(headers,[/withheld|withhold|w\/h|cc fee|credit.*fee|processing.*fee/i],'')};
+  state.map=H;
+  $('#autoMap').innerHTML=`<b>Detected:</b> Name=<code>${H.name}</code> • Role=<code>${H.role}</code> • Date=<code>${H.date}</code> • Hours=<code>${H.hours||'(none)'}</code> • Tips=<code>${H.tips||'(none)'}</code> • Gratuity=<code>${H.grat||'(none)'}</code> • Withheld=<code>${H.withheld||'(none)'}</code>`;
+  const tmp=[],dset=new Set();
+  for(const r of raw){const name=(r[H.name]||'').toString().trim();if(!name)continue;const role=normRole(r[H.role]);const date=toYmd(r[H.date]);if(!date)continue;const hoursC=toCents(num(r[H.hours]));const tipsC=toCents(num(r[H.tips]));const gratC=toCents(num(r[H.grat]));const withC=toCents(num(r[H.withheld]));tmp.push({name,role,date,hoursC,tipsC,gratC,withC});dset.add(date)}
+  const mp=new Map();for(const r of tmp){const k=`${r.name}|${r.role}|${r.date}`;const prev=mp.get(k)||{name:r.name,role:r.role,date:r.date,hoursC:0,tipsC:0,gratC:0,withC:0};prev.hoursC+=r.hoursC;prev.tipsC+=r.tipsC;prev.gratC+=r.gratC;prev.withC+=r.withC;mp.set(k,prev)}
+  state.rows=Array.from(mp.values()); state.dates=Array.from(dset).sort(); if(state.dates.length){state.range.start=state.dates[0];state.range.end=state.dates[state.dates.length-1]}
+  if(!state.settings.start)state.settings.start=state.range.start; if(!state.settings.end)state.settings.end=state.range.end; persist(); hydrateSettings();
+  $('#uploadStatus').innerHTML=`<span style="color:#22c55e">Processed.</span> Dates: <b>${state.range.start||'?'}</b> → <b>${state.range.end||'?'}</b>. Rows: ${state.rows.length}.`;
+  recalc(); populateHelpDates(); show('calc')
 }
-$('#nav-upload').onclick=()=>setStep('upload');
-$('#nav-review').onclick=()=>!$('#nav-review').classList.contains('locked')&&setStep('review');
-$('#nav-attendance').onclick=()=>!$('#nav-attendance').classList.contains('locked')&&setStep('attendance');
-$('#nav-calc').onclick=()=>!$('#nav-calc').classList.contains('locked')&&setStep('calc');
-$('#nav-archives').onclick=()=>setStep('archives');
+$('#fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>handleUploadText(fr.result);fr.readAsText(f)}
+const drop=$('#drop'); drop.ondragover=e=>{e.preventDefault();drop.style.opacity='.8'}; drop.ondragleave=()=>drop.style.opacity='1'; drop.ondrop=e=>{e.preventDefault();drop.style.opacity='1';const f=e.dataTransfer.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>handleUploadText(fr.result);fr.readAsText(f)}
+$('#btnUseSample').onclick=()=>{const s=`employee,Job Title,Regular Hours,Total Tips,Total Gratuity,Tips Withheld,date
+"Park, Jung",Server,8,100,0,0,2025-09-08
+"Le, Natalie",Server,8,200,0,0,2025-09-08
+"Fuller, Grace",Host,6,0,0,0,2025-09-08
+"Brandenburg, Mei",Busser,6,0,0,0,2025-09-08
+"Alvarez, Andrea",Cook,8,0,0,0,2025-09-08
+"Chanchavac, Anderson",Prep,8,0,0,0,2025-09-08
+"Rosales, Marcos","Meat Assist",8,0,0,0,2025-09-08
+"Hernandez, Filiciano",Dishwasher,6,0,0,0,2025-09-08
+"Park, Jung",Server,8,150,0,0,2025-09-09
+"Le, Natalie",Server,5,50,0,0,2025-09-09
+"Fuller, Grace",Host,6,0,0,0,2025-09-09
+"Alvarez, Andrea",Cook,8,0,0,0,2025-09-09`; handleUploadText(s)}
+$('#btnGoCalc').onclick=()=>show('calc')
 
-/* ===== CSV Parsing ===== */
-function simpleCSV(text){
-  // tiny CSV (supports quoted fields / escaped quotes)
-  const out=[]; let i=0,row=[],cell='',q=false;
-  while(i<text.length){
-    const ch=text[i++];
-    if(q){ if(ch==='\"'){ if(text[i]==='\"'){cell+='\"';i++;} else q=false; }
-          else cell+=ch; }
-    else { if(ch==='\"') q=true;
-           else if(ch===','){ row.push(cell); cell=''; }
-           else if(ch==='\n'){ row.push(cell); out.push(row); row=[]; cell=''; }
-           else if(ch!=='\r'){ cell+=ch; } }
-  }
-  row.push(cell); out.push(row);
-  const headers=out.shift()||[];
-  return out.filter(r=>r.some(x=>String(x).trim())).map(r=>{
-    const o={}; headers.forEach((h,idx)=>o[String(h||'').trim()]=r[idx]??''); return o;
-  });
-}
-function parseDateFlexible(raw){
-  raw=String(raw||'').trim(); if(!raw) return null;
-  let m=raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/); if(m){const d=new Date(+m[1],+m[2]-1,+m[3]); if(!isNaN(d)) return d;}
-  m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/); if(m){let y=+m[3]; if(y<100) y=2000+y; const d=new Date(y,+m[1]-1,+m[2]); if(!isNaN(d)) return d;}
-  m=raw.match(/^(\d{1,2})[- ]([A-Za-z]{3,})$/); if(m){const months=['jan','feb','mar','apr','may','jun','jul','aug','sep','sept','oct','nov','dec']; let mi=months.indexOf(m[2].toLowerCase()); if(mi===8) mi=8; if(mi>=0){ const d=new Date(new Date().getFullYear(),mi,+m[1]); if(!isNaN(d)) return d; } }
-  return null;
-}
-const H_EMP=['employee name','employee','name','firstname + lastname','first + last','first name + last name'];
-const H_JOB=['job title','job','title','position'];
-const H_DATE=['work date','date','workdate','business date'];
-const H_HRS=['regular hours','hours','regularhours','reg hours','hours worked','job hours','total hours','reg hrs'];
-const H_TIPS=['total tips','tips','totaltips','cctips','credit card tips','card tips','non-cash tips','tips total'];
-const H_GRAT=['gratuity','auto gratuity','auto-grat','auto grat','gratuity tips','grats'];
-const H_WITHH=['withheld amount','withheld','tips withheld','withhold'];
-function findHeader(headers,keys){ const n=headers.map(h=>canon(h)); for(let i=0;i<headers.length;i++){ if(keys.includes(n[i])) return headers[i]; }
-  for(let i=0;i<headers.length;i++){ if(keys.some(k=>n[i].includes(k))) return headers[i]; } return null; }
+/*** Attendance helpers ***/
+function inRange(d){const s=$('#sStart').value||state.settings.start||state.range.start;const e=$('#sEnd').value||state.settings.end||state.range.end;return(!s||d>=s)&&(!e||d<=e)}
+function getWorkedMap(){const w={};for(const r of state.rows){if(!inRange(r.date))continue;const ok=(r.hoursC>0)||(r.tipsC>0)||(r.gratC>0);if(ok)(w[r.date] ||= new Set()).add(`${r.name}|${r.role}`)}for(const m of state.manual){for(const [d,on] of Object.entries(m.days||{})){if(on)(w[d] ||= new Set()).add(`${m.name}|${m.role}`)}}return w}
+function renderAttendance(){const wrap=$('#attWrap');wrap.innerHTML='';if(!state.dates.length){wrap.innerHTML='<div class="help">Upload CSV to see attendance.</div>';return}const dates=state.dates.filter(inRange).slice(0,14);const worked=getWorkedMap();const pr=new Map();for(const r of state.rows){if(!inRange(r.date))continue;const k=`${r.name}|${r.role}`;if(!pr.has(k))pr.set(k,{name:r.name,role:r.role,days:{}})}for(const m of state.manual){const k=`${m.name}|${m.role}`;if(!pr.has(k))pr.set(k,{name:m.name,role:m.role,days:{}});for(const d of dates){if(m.days&&m.days[d])pr.get(k).days[d]=true}}for(const d of dates){const set=worked[d]||new Set();for(const k of set){const o=pr.get(k)||(()=>{const[nm,rl]=k.split('|');const x={name:nm,role:rl,days:{}};pr.set(k,x);return x})();o.days[d]=true}}const keys=Array.from(pr.keys()).sort();for(const k of keys){const o=pr.get(k);const row=document.createElement('div');row.className='gridRow';row.innerHTML=`<div><b>${o.name}</b> <span class="badge">${o.role}</span></div>`+dates.map(d=>`<div class="dayCell ${o.days[d]?'on':''}" data-k="${k}" data-d="${d}">${o.days[d]?'✓':''}</div>`).join('');row.onclick=e=>{const cell=e.target.closest('.dayCell');if(!cell)return;cell.classList.toggle('on');cell.textContent=cell.classList.contains('on')?'✓':'';const[nm,rl]=cell.dataset.k.split('|'),d=cell.dataset.d;let m=state.manual.find(x=>x.name===nm && x.role===rl);if(!m){m={name:nm,role:rl,days:{}};state.manual.push(m)}m.days[d]=cell.classList.contains('on');persist()};wrap.appendChild(row)}const legend=document.createElement('div');legend.className='legend';legend.style.marginTop='8px';legend.innerHTML=`<span class="dot on"></span> worked &nbsp; <span class="dot off"></span> not worked`;wrap.appendChild(legend)}
+$('#btnAddManual').onclick=()=>{const name=prompt('Full Name');if(!name)return;const role=prompt('Role (server, host, busser, expo, cook, prep, meat, cook assist, prep assist, meat assist, dishwasher)');if(!role)return;state.manual.push({name,role:normRole(role),days:{}});persist();renderAttendance()}
+$('#btnClearManual').onclick=()=>{if(confirm('Remove all manually added people?')){state.manual=[];persist();renderAttendance()}}
 
-const ROLE_MAP={
-  'cook lead':'cook','lead cook':'cook','kitchen lead':'cook','meat lead':'meat','lead meat':'meat','prep lead':'prep','lead prep':'prep',
-  'cook assist':'cook assist','cook assistant':'cook assist','assistant cook':'cook assist','kitchen assistant':'cook assist',
-  'meat assist':'meat assist','meat assistant':'meat assist','assistant meat':'meat assist',
-  'prep assist':'prep assist','prep assistant':'prep assist','assistant prep':'prep assist',
-  'dishwasher':'dishwasher','dish':'dishwasher','dish washer':'dishwasher','dishwash':'dishwasher',
-  'host':'host','hostess':'host','host/hostess':'host',
-  'busser':'busser','bus':'busser','bus boy':'busser','busgirl':'busser','bus person':'busser','busperson':'busser',
-  'server':'server','waiter':'server','waitress':'server','expo':'expo'
-};
-const FOH_ROLES=new Set(['server','host','busser','expo']);
+/*** Core math helpers ***/
+function centsSplitEqual(total,n){if(n<=0)return[];const b=Math.floor(total/n),r=total-b*n;return Array.from({length:n},(_,i)=>b+(i<r?1:0))}
+function sum(a){return a.reduce((x,y)=>x+(+y||0),0)}
+function baseForRowCalc(r,settings,acc){let base=r.tipsC+(settings.incGrat?r.gratC:0);if(settings.exWithheld){const fallback=Math.round(base*(settings.withholdPct/100));base-= (r.withC>0?r.withC:fallback)}if(settings.ccMode==='before'){const cc=Math.round(base*(settings.ccPct/100));base-=cc;if(acc)acc.cc+=cc}return Math.max(0,base)}
 
-function processCSV(text){
-  const rows=simpleCSV(text); const errors=[],warnings=[];
-  if(!rows.length){errors.push('CSV file is empty'); return {errors,warnings};}
-  const headers=Object.keys(rows[0]||{});
-  const hEmp=findHeader(headers,H_EMP), hJob=findHeader(headers,H_JOB), hDate=findHeader(headers,H_DATE),
-        hHrs=findHeader(headers,H_HRS), hTips=findHeader(headers,H_TIPS),
-        hGrat=findHeader(headers,H_GRAT), hWith=findHeader(headers,H_WITHH);
-  if(!hEmp) errors.push('Missing Employee Name column');
-  if(!hJob) errors.push('Missing Job Title column');
-  if(!hDate) errors.push('Missing Work Date column');
-  if(!hTips) warnings.push('No recognizable Tips column (we’ll treat missing as $0)');
-  if(errors.length) return {errors,warnings};
+/*** Calculator ***/
+let personDaily={},results=[],sortBy={key:'tip',dir:'desc'},viewFilter='ALL',kpi={orig:0,keeps:0,boh:0,hb:0,cc:0};
+function recalc(){results=[];personDaily={};kpi={orig:0,keeps:0,boh:0,hb:0,cc:0};const byDate={};for(const r of state.rows){if(!inRange(r.date))continue;(byDate[r.date] ||= []).push(r)}const dates=Object.keys(byDate).sort();const ensure=n=>{let o=results.find(x=>x.name===n);if(!o){o={name:n,roles:new Set(),days:0,tip:0,orig:0,bohContrib:0,hbContrib:0};results.push(o)}return o};const addDaily=(n,row)=>{(personDaily[n] ||= []).push(row)};
+  for(const d of dates){const rows=byDate[d],worked=getWorkedMap()[d]||new Set();const servers=new Map();for(const r of rows){if(r.role==='server'&&((r.hoursC>0)||(r.tipsC>0)||(r.gratC>0))){const base=baseForRowCalc(r,state.settings,kpi);if(base>0)servers.set(r.name,(servers.get(r.name)||0)+base)}}let dayBoh=0,dayHb=0;const dayKeep=new Map();for(const [nm,base] of servers){const boh=Math.round(base*(state.settings.bohPct/100));let hb;if(state.settings.hbBasis==='remaining'){hb=Math.round((base-boh)*(state.settings.hbPct/100))}else{hb=Math.round(base*(state.settings.hbPct/100))}let keep=base-boh-hb;if(state.settings.ccMode==='after'){const cc=Math.round(keep*(state.settings.ccPct/100));keep-=cc;kpi.cc+=cc}dayBoh+=boh;dayHb+=hb;dayKeep.set(nm,(dayKeep.get(nm)||0)+keep);kpi.orig+=base;const p=ensure(nm);p.roles.add('server');p.orig+=base;p.days+=1;p.bohContrib+=boh;p.hbContrib+=hb;addDaily(nm,{date:d,base,keeps:keep,hb:0,boh:0,returned:0,role:'server'})}
+    if(dayHb>0){const hbRec=Array.from(worked).map(k=>k.split('|')).filter(([,rl])=>HB_ROLES.has(rl));if(hbRec.length){const per=centsSplitEqual(dayHb,hbRec.length);hbRec.forEach(([nm,rl],i)=>{const p=ensure(nm);p.roles.add(rl);p.tip+=per[i];p.days+=1;addDaily(nm,{date:d,base:0,keeps:0,hb:per[i],boh:0,returned:0,role:rl})});kpi.hb+=dayHb}else{const total=sum(Array.from(servers.values()));for(const [nm,base] of servers){const sh=Math.round(dayHb*(total?base/total:0));dayKeep.set(nm,(dayKeep.get(nm)||0)+sh);const rec=(personDaily[nm]||[]).find(x=>x.date===d&&x.role==='server');if(rec){rec.returned+=sh;rec.keeps+=sh}}}}
+    if(dayBoh>0){const bohRec=Array.from(worked).map(k=>k.split('|')).filter(([,rl])=>ROLE_TIER[rl]);if(bohRec.length){const lead=bohRec.filter(([,rl])=>ROLE_TIER[rl]==='lead'),assist=bohRec.filter(([,rl])=>ROLE_TIER[rl]==='assist'),dish=bohRec.filter(([,rl])=>ROLE_TIER[rl]==='dish');let[wL,wA,wD]=state.settings.bohTiers.map(x=>+x||0);const active=[];if(lead.length)active.push({arr:lead,w:wL});if(assist.length)active.push({arr:assist,w:wA});if(dish.length)active.push({arr:dish,w:wD});const wsum=active.reduce((a,b)=>a+b.w,0);if(active.length&&wsum>0){let alloc=0;active.forEach((t,idx)=>{const pool=(idx===active.length-1)?(dayBoh-alloc):Math.round(dayBoh*(t.w/wsum));alloc+=pool;const per=centsSplitEqual(pool,t.arr.length);t.arr.forEach(([nm,rl],i)=>{const p=ensure(nm);p.roles.add(rl);p.tip+=per[i];p.days+=1;addDaily(nm,{date:d,base:0,keeps:0,hb:0,boh:per[i],returned:0,role:rl})})});kpi.boh+=dayBoh}else{const total=sum(Array.from(servers.values()));for(const [nm,base] of servers){const sh=Math.round(dayBoh*(total?base/total:0));dayKeep.set(nm,(dayKeep.get(nm)||0)+sh);const rec=(personDaily[nm]||[]).find(x=>x.date===d&&x.role==='server');if(rec){rec.returned+=sh;rec.keeps+=sh}}}}else{const total=sum(Array.from(servers.values()));for(const [nm,base] of servers){const sh=Math.round(dayBoh*(total?base/total:0));dayKeep.set(nm,(dayKeep.get(nm)||0)+sh);const rec=(personDaily[nm]||[]).find(x=>x.date===d&&x.role==='server');if(rec){rec.returned+=sh;rec.keeps+=sh}}}}
+    if(state.settings.fohPolicy==='ServerKeeps'){for(const [nm,amt]of dayKeep){const p=ensure(nm);p.roles.add('server');p.tip+=amt}}}
+  results.forEach(r=>r.roles=Array.from(r.roles));renderResults()}
+function isFOH(r){return r.roles.some(x=>FOH_ROLES.has(x))}function isBOH(r){return r.roles.some(x=>!FOH_ROLES.has(x))}
+let openDetail='';function renderResults(){const body=$('#resultBody');body.innerHTML='';$('#k-keep-label').textContent=(state.settings.fohPolicy==='ServerKeeps')?'Server Keeps':'FOH Pool';const totalPaid=sum(results.map(r=>r.tip));$('#k-total').textContent=fmt(totalPaid);let keepsKPI=0;for(const [name,rows]of Object.entries(personDaily)){for(const rr of rows){if(rr.role==='server')keepsKPI+=rr.keeps}}$('#k-keeps').textContent=fmt(keepsKPI);$('#k-boh').textContent=fmt(kpi.boh);$('#k-hb').textContent=fmt(kpi.hb);$('#k-orig').textContent=fmt(kpi.orig);$('#k-cc').textContent=fmt(kpi.cc);$('#k-emp').textContent=String(results.length);let rows=results.slice();if(viewFilter==='FOH')rows=rows.filter(isFOH);else if(viewFilter==='BOH')rows=rows.filter(isBOH);rows.sort((a,b)=>sortBy.key==='name'?a.name.localeCompare(b.name):((+b[sortBy.key]||0)-(+a[sortBy.key]||0)));for(const r of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><span class="linky name">${r.name}</span></td><td>${r.roles.map(x=>`<span class="badge">${x}</span>`).join(' ')}</td><td class="right mono">${r.days}</td><td class="right mono">${fmt(r.tip)}</td><td class="right mono">${r.orig?fmt(r.orig):'N/A'}</td><td class="right mono">${r.bohContrib?fmt(r.bohContrib):'—'}</td><td class="right mono">${r.hbContrib?fmt(r.hbContrib):'—'}</td>`;body.appendChild(tr);const dtr=document.createElement('tr');dtr.className='detailRowHolder';dtr.innerHTML=`<td colspan="7" class="detailCell"><div class="detailBox" data-for="${r.name}"></div></td>`;body.appendChild(dtr);tr.querySelector('.name').onclick=()=>{if(openDetail===r.name){openDetail='';dtr.querySelector('.detailBox').innerHTML='';dtr.style.display='none';return}$$('tr.detailRowHolder').forEach(x=>{x.querySelector('.detailBox').innerHTML='';x.style.display='none'});openDetail=r.name;dtr.style.display='';renderDetailFor(r.name,dtr.querySelector('.detailBox'))};dtr.style.display=(openDetail===r.name)?'':'none'}}
+function renderDetailFor(name,box){const rows=(personDaily[name]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));let html=`<div class="detailHead mono"><div>Daily breakdown — ${name}</div><div class="right">Base</div><div class="right">Keeps</div><div class="right">HB</div><div class="right">BOH</div><div class="right">Returned</div><div class="right">CC Fee</div><div class="right">Role</div></div>`;let tot={base:0,keeps:0,hb:0,boh:0,ret:0,cc:0};for(const r of rows){tot.base+=r.base||0;tot.keeps+=r.keeps||0;tot.hb+=r.hb||0;tot.boh+=r.boh||0;tot.ret+=r.returned||0;tot.cc+=r.cc||0;html+=`<div class="detailRow mono"><div>${r.date}</div><div class="right">${fmt(r.base||0)}</div><div class="right">${fmt(r.keeps||0)}</div><div class="right">${fmt(r.hb||0)}</div><div class="right">${fmt(r.boh||0)}</div><div class="right">${fmt(r.returned||0)}</div><div class="right">${fmt(r.cc||0)}</div><div class="right">${r.role}</div></div>`}html+=`<div class="detailRow mono" style="border-top:1px solid rgba(255,255,255,.06);font-weight:700"><div>TOTAL</div><div class="right">${fmt(tot.base)}</div><div class="right">${fmt(tot.keeps)}</div><div class="right">${fmt(tot.hb)}</div><div class="right">${fmt(tot.boh)}</div><div class="right">${fmt(tot.ret)}</div><div class="right">${fmt(tot.cc)}</div><div></div></div>`;box.innerHTML=html}
 
-  const emps=new Map(); // key: person::role
-  const workDays=[]; const dates=[];
-  for(let i=0;i<rows.length;i++){
-    const row=rows[i];
-    const rawName=String(row[hEmp]||'').trim(); if(!rawName){warnings.push(`Row ${i+2}: missing employee name`); continue;}
-    const nameKey=rawName.toLowerCase().replace(/\s+/g,' ').trim().replace(/,+/g,'');
-    let role=ROLE_MAP[canon(row[hJob]||'')]||canon(row[hJob]||'')||'server';
-    const dt=parseDateFlexible(row[hDate]); if(!dt){errors.push(`Row ${i+2}: invalid date "${row[hDate]}"`); continue;}
-    const date=fmt(dt); if(!dates.includes(date)) dates.push(date);
-    const hours=hHrs?Number(String(row[hHrs]||'0').replace(/[^0-9.\-]/g,''))||0:0;
-    const tips=hTips?Number(String(row[hTips]||'0').replace(/[^0-9.\-]/g,''))||0:0;
-    const grat=hGrat?Number(String(row[hGrat]||'0').replace(/[^0-9.\-]/g,''))||0:0;
-    const withheld=hWith?Number(String(row[hWith]||'0').replace(/[^0-9.\-]/g,''))||0:0;
+/*** Sorting / filter / export / print / settings / archives ***/
+$$('#resultTbl thead th').forEach(th=>th.onclick=()=>{const k=th.dataset.sort;if(!k)return;sortBy.key=k;renderResults()});
+$$('#v-calc .pill button[data-filter]').forEach(b=>b.onclick=()=>{$$('#v-calc .pill button[data-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');viewFilter=b.dataset.filter;renderResults()});
+$('#btnExport').onclick=()=>{const rows=[['Employee Name','Roles','Days Worked','Tip Amount','Original Tips','BOH Contrib','HB Contrib']];let out=results.slice();if(viewFilter==='FOH')out=out.filter(isFOH);else if(viewFilter==='BOH')out=out.filter(isBOH);out.sort((a,b)=>b.tip-a.tip);for(const r of out){rows.push([r.name,r.roles.join(' / '),r.days,(r.tip/100).toFixed(2),(r.orig?(r.orig/100).toFixed(2):''),(r.bohContrib?(r.bohContrib/100).toFixed(2):''),(r.hbContrib?(r.hbContrib/100).toFixed(2):'')])}const csv=rows.map(r=>r.map(v=>`"${(v??'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`tip-distribution-${$('#sStart').value||state.range.start||'start'}-${$('#sEnd').value||state.range.end||'end'}.csv`;a.click()}
+$('#btnPrint').onclick=()=>window.print()
+$('#btnArchive').onclick=()=>{const snap={ts:new Date().toISOString(),settings:{...state.settings,start:$('#sStart').value||state.range.start,end:$('#sEnd').value||state.range.end},kpi:{total:$('#k-total').textContent,keeps:$('#k-keeps').textContent,boh:$('#k-boh').textContent,hb:$('#k-hb').textContent,orig:$('#k-orig').textContent,cc:$('#k-cc').textContent},rows:results.map(r=>({name:r.name,roles:r.roles,days:r.days,tip:fmt(r.tip),orig:r.orig?fmt(r.orig):'N/A',bohContrib:fmt(r.bohContrib||0),hbContrib:fmt(r.hbContrib||0)}))};const rowsCSV=[['Employee Name','Roles','Days Worked','Tip Amount','Original Tips','BOH Contrib','HB Contrib']].concat(results.map(r=>[r.name,r.roles.join(' / '),r.days,(r.tip/100).toFixed(2),(r.orig?(r.orig/100).toFixed(2):''),(r.bohContrib?(r.bohContrib/100).toFixed(2):''),(r.hbContrib?(r.hbContrib/100).toFixed(2):'')]));snap.rowsCSV=rowsCSV.map(r=>r.join(',')).join('\n');state.archives.unshift(snap);persist();alert('Saved to Archive.');renderArchives()}
+$('#btnApply').onclick=()=>{state.settings.bohPct=+$('#sBohPct').value||0;state.settings.hbPct=+$('#sHbPct').value||0;state.settings.hbBasis=$('#sHbBasis').value;state.settings.incGrat=$('#sGrat').value==='yes';state.settings.exWithheld=$('#sWithheld').value==='yes';state.settings.withholdPct=+$('#sWithholdPct').value||0;state.settings.ccPct=+$('#sCcPct').value||0;state.settings.ccMode=$('#sCcMode').value;state.settings.fohPolicy=$('#sFoh').value;const tiers=$('#sBohTiers').value.split(',').map(x=>+x.trim()).filter(x=>!isNaN(x)&&x>=0);state.settings.bohTiers=tiers.length===3?tiers:[50,35,15];state.settings.start=$('#sStart').value||state.range.start;state.settings.end=$('#sEnd').value||state.range.end;persist();recalc()}
 
-    const posKey=nameKey+'::'+role;
-    if(!emps.has(posKey)){
-      const empId=uid();
-      const dept=FOH_ROLES.has(role)?'FOH':'BOH';
-      emps.set(posKey,{id:empId,name:rawName,department:dept,role});
-    }
-    const emp=emps.get(posKey);
-    if(hours>0){
-      const wd={employeeId:emp.id,date,worked:true};
-      if(role==='server'){ wd.individualTips=tips; wd.gratuity=grat; wd.withheldAmt=withheld; wd.hours=hours; }
-      else { wd.hours=hours; }
-      workDays.push(wd);
-    }
-  }
-  dates.sort();
-  const employees=[...emps.values()];
-  if(!employees.length){errors.push('No valid employees found');}
-  return {errors,warnings,employees,workDays,dates};
-}
+/*** Navigation & archives ***/
+function show(v){['upload','calc','attendance','help','archives'].forEach(x=>{$('#v-'+x).classList.toggle('hide',x!==v);document.querySelector('button[data-view="'+x+'"]').classList.toggle('active',x===v)});if(v==='attendance')renderAttendance();if(v==='archives')renderArchives();if(v==='help'){populateHelpDates();renderHelpSampler()}}
+$$('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));
+function renderArchives(){const box=$('#archWrap');if(!box)return;box.innerHTML='';if(!state.archives.length){box.innerHTML='<div class="help">No archives yet. Use “Save to Archive”.</div>';return}state.archives.forEach((a,idx)=>{const div=document.createElement('div');div.className='card';div.style.marginBottom='8px';div.innerHTML=`<div class="rowbar"><b>${new Date(a.ts).toLocaleString()}</b><div class="pill"><button class="btn ghost" data-dl="${idx}">Download CSV</button><button class="btn ghost" data-del="${idx}">Delete</button></div></div><div class="help">Settings: BOH ${a.settings.bohPct}%, HB ${a.settings.hbPct}% (${a.settings.hbBasis}), Gratuity ${a.settings.incGrat?'YES':'NO'}, Withheld ${a.settings.exWithheld?'YES':'NO'} (${a.settings.withholdPct}% fallback), CC ${a.settings.ccPct}% (${a.settings.ccMode}), FOH ${a.settings.fohPolicy}, Tiers ${a.settings.bohTiers.join(',')}, Range ${a.settings.start} → ${a.settings.end}</div>`;box.appendChild(div);div.querySelector('[data-dl]').onclick=()=>{const blob=new Blob([a.rowsCSV],{type:'text/csv'});const x=document.createElement('a');x.href=URL.createObjectURL(blob);x.download=`archive-${idx}.csv`;x.click()};div.querySelector('[data-del]').onclick=()=>{if(confirm('Delete this archive?')){state.archives.splice(idx,1);persist();renderArchives()}}})}
 
-/* ===== Upload handlers ===== */
-$('#csvInput').addEventListener('change', e=>{
-  const file=e.target.files[0]; if(!file) return;
-  $('#fileName').textContent=file.name;
-  const reader=new FileReader();
-  reader.onload=()=>handleCSV(reader.result);
-  reader.readAsText(file);
-});
-const dz=$('#dropzone');
-dz.addEventListener('dragover',e=>{e.preventDefault(); dz.classList.add('drag');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
-dz.addEventListener('drop',e=>{
-  e.preventDefault(); dz.classList.remove('drag');
-  const file=e.dataTransfer.files[0]; if(!file) return;
-  $('#csvInput').files=e.dataTransfer.files;
-  $('#fileName').textContent=file.name;
-  const reader=new FileReader(); reader.onload=()=>handleCSV(reader.result); reader.readAsText(file);
-});
-$('#btnClearUpload').onclick=()=>{
-  $('#csvInput').value=''; $('#fileName').textContent='';
-  $('#warnBox').classList.add('hidden'); $('#errBox').classList.add('hidden');
-};
-$('#btnTemplate').onclick=()=>{
-  const head=['Employee Name','Job Title','Work Date','Regular Hours','Total Tips','Gratuity','Withheld Amount'];
-  const sample=`${head.join(',')}\nJane Doe,Server,2025-09-08,8,250.35,40.00,0\nJohn Roe,Cook,2025-09-08,8,0,0,0\n`;
-  downloadFile('mukja-sample.csv',sample);
-};
+/*** Help & Visual Day Sampler ***/
+function populateHelpDates(){const sel=$('#hDate');if(!sel)return;sel.innerHTML='';const ds=state.dates.filter(inRange);if(!ds.length){sel.innerHTML='<option value="">(no dates)</option>';return}ds.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o)});if(!sel.value)sel.value=ds[0];$('#hBohPct').value=state.settings.bohPct;$('#hHbPct').value=state.settings.hbPct;$('#hHbBasis').value=state.settings.hbBasis;$('#hWithholdPct').value=state.settings.withholdPct;$('#hCcPct').value=state.settings.ccPct;$('#hCcMode').value=state.settings.ccMode;$('#hGrat').value=state.settings.incGrat?'yes':'no'}
+function renderHelpSampler(){const cards=$('#hCards');cards.innerHTML='';const d=$('#hDate').value;if(!d){cards.innerHTML='<div class="help">No date selected.</div>';renderTraining();return}
+  const settings={bohPct:+$('#hBohPct').value||0,hbPct:+$('#hHbPct').value||0,hbBasis:$('#hHbBasis').value,withholdPct:+$('#hWithholdPct').value||0,ccPct:+$('#hCcPct').value||0,ccMode:$('#hCcMode').value,incGrat:$('#hGrat').value==='yes',exWithheld:state.settings.exWithheld,bohTiers:state.settings.bohTiers.slice()};
+  const rows=state.rows.filter(r=>r.date===d);const worked=getWorkedMap()[d]||new Set();const acc={cc:0};
+  // servers base
+  const servers=new Map();for(const r of rows){if(r.role==='server'&&((r.hoursC>0)||(r.tipsC>0)||(r.gratC>0))){const base=baseForRowCalc(r,settings,acc);if(base>0)servers.set(r.name,(servers.get(r.name)||0)+base)}}
+  const serverCount=servers.size, aggBase=sum(Array.from(servers.values()));
+  // per-server contributions
+  let dayBoh=0,dayHb=0,afterCc=0;for(const [nm,base] of servers){const boh=Math.round(base*(settings.bohPct/100));const hb=(settings.hbBasis==='remaining')?Math.round((base-boh)*(settings.hbPct/100)):Math.round(base*(settings.hbPct/100));let keep=base-boh-hb;if(settings.ccMode==='after'){const cc=Math.round(keep*(settings.ccPct/100));keep-=cc;acc.cc+=cc}dayBoh+=boh;dayHb+=hb;afterCc+=keep}
+  // HB recipients
+  const hbRec=Array.from(worked).map(k=>k.split('|')).filter(([,rl])=>HB_ROLES.has(rl));
+  const hbEach=hbRec.length?Math.round(dayHb/hbRec.length):0;
+  // BOH recipients
+  const bohRec=Array.from(worked).map(k=>k.split('|')).filter(([,rl])=>ROLE_TIER[rl]);
+  const lead=bohRec.filter(([,rl])=>ROLE_TIER[rl]==='lead'),assist=bohRec.filter(([,rl])=>ROLE_TIER[rl]==='assist'),dish=bohRec.filter(([,rl])=>ROLE_TIER[rl]==='dish');
+  let[wL,wA,wD]=state.settings.bohTiers.map(x=>+x||0);const active=[];if(lead.length)active.push({arr:lead,w:wL});if(assist.length)active.push({arr:assist,w:wA});if(dish.length)active.push({arr:dish,w:wD});const wsum=active.reduce((a,b)=>a+b.w,0);
+  let leadPool=0,assistPool=0,dishPool=0; if(active.length&&wsum>0){leadPool=Math.round(dayBoh*(wL/wsum));assistPool=Math.round(dayBoh*(wA/wsum));dishPool=dayBoh-leadPool-assistPool}
+  const perLead=lead.length?Math.round(leadPool/lead.length):0,perAssist=assist.length?Math.round(assistPool/assist.length):0,perDish=dish.length?Math.round(dishPool/dish.length):0;
+  // Cards UI
+  const c1=document.createElement('div');c1.className='col card';c1.innerHTML=`<div class="chip blue">Server Base (this date)</div><div class="help" style="margin-top:6px">Servers worked: <b>${serverCount}</b></div><div class="help">Aggregated Base: <b class="mono">${fmt(aggBase)}</b></div>`;
+  const c2=document.createElement('div');c2.className='col card';c2.innerHTML=`<div class="chip purple">BOH Pool</div><div style="margin-top:6px">Total: <b class="mono">${fmt(dayBoh)}</b></div><div class="pill"><span class="chip purple">Lead ${wL}%: ${fmt(leadPool)}</span><span class="chip purple">Assist ${wA}%: ${fmt(assistPool)}</span><span class="chip purple">Dish ${wD}%: ${fmt(dishPool)}</span></div><div class="help" style="margin-top:6px">Per person shown below.</div>`;
+  const c3=document.createElement('div');c3.className='col card';c3.innerHTML=`<div class="chip green">HB Pool</div><div style="margin-top:6px">Total: <b class="mono">${fmt(dayHb)}</b></div><div class="help">Per person: <b class="mono">${fmt(hbEach)}</b> (${hbRec.length||0} recipients)</div>`;
+  cards.appendChild(c1);cards.appendChild(c2);cards.appendChild(c3);
+  // per-tier counts
+  const r1=document.createElement('div');r1.className='col card';r1.innerHTML=`Leads worked: <b>${lead.length}</b><div class="help">Per Lead: <b class="mono">${fmt(perLead)}</b></div>`;
+  const r2=document.createElement('div');r2.className='col card';r2.innerHTML=`Assists worked: <b>${assist.length}</b><div class="help">Per Assist: <b class="mono">${fmt(perAssist)}</b></div>`;
+  const r3=document.createElement('div');r3.className='col card';r3.innerHTML=`Dish worked: <b>${dish.length}</b><div class="help">Per Dish: <b class="mono">${fmt(perDish)}</b></div>`;
+  cards.appendChild(r1);cards.appendChild(r2);cards.appendChild(r3);
+  renderTraining(settings)}
+function renderTraining(settings){if(!settings){settings={bohPct:+$('#hBohPct').value||state.settings.bohPct,hbPct:+$('#hHbPct').value||state.settings.hbPct,hbBasis:$('#hHbBasis').value,ccPct:+$('#hCcPct').value||state.settings.ccPct,ccMode:$('#hCcMode').value}}const S=10000;let boh=Math.round(S*(settings.bohPct/100));let hb=(settings.hbBasis==='remaining')?Math.round((S-boh)*(settings.hbPct/100)):Math.round(S*(settings.hbPct/100));let keeps=S-boh-hb;if(settings.ccMode==='after'){const cc=Math.round(keeps*(settings.ccPct/100));keeps-=cc}const [wL,wA,wD]=state.settings.bohTiers;const sumW=wL+wA+wD||1;const lead=Math.round(boh*(wL/sumW)),assist=Math.round(boh*(wA/sumW)),dish=boh-lead-assist;$('#hTraining').innerHTML=`BOH ${settings.bohPct}% = ${fmt(boh)} • HB ${settings.hbPct}% ${settings.hbBasis==='remaining'?'(of 70%)':''} = ${fmt(hb)} • Server keeps = ${fmt(keeps)}<br/>Leads ${fmt(lead)} • Assists ${fmt(assist)} • Dish ${fmt(dish)}`}
+$('#hApply').onclick=()=>renderHelpSampler();$('#hBack').onclick=()=>show('calc');$('#hPrint').onclick=()=>window.print();
 
-function showMsg(boxId,items,color){
-  const box=$(boxId); if(!items || !items.length){ box.classList.add('hidden'); return; }
-  box.innerHTML=`<div class="bd"><b style="color:${color}">${items.length} issue(s)</b><ul>${items.map(x=>`<li>${escape(x)}</li>`).join('')}</ul></div>`;
-  box.classList.remove('hidden');
-}
+/*** Save/Load/Reset ***/
+$('#btnReset').onclick=()=>{if(!confirm('Clear everything (you can still import a saved state JSON later)?'))return;localStorage.removeItem('mukja-v5');state={rows:[],dates:[],manual:[],range:{start:'',end:''},map:{},settings:{bohPct:30,hbPct:10,hbBasis:'remaining',incGrat:true,exWithheld:true,withholdPct:0,ccPct:3,ccMode:'after',fohPolicy:'ServerKeeps',bohTiers:[50,35,15],start:'',end:''},archives:[]};hydrateSettings();show('upload')}
+$('#btnSave').onclick=()=>{const blob=new Blob([localStorage.getItem('mukja-v5')||'{}'],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mukja-state.json';a.click()}
+$('#btnLoad').onclick=()=>{const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=()=>{const f=i.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{try{localStorage.setItem('mukja-v5',fr.result);load();renderAttendance();recalc();alert('State loaded.');show('calc')}catch{alert('Invalid state file')}};fr.readAsText(f)};i.click()}
 
-function handleCSV(text){
-  $('#stage').classList.remove('hidden'); $('#stageText').textContent='Parsing → Validating → Processing';
-  const res=processCSV(text);
-  showMsg('#warnBox',res.warnings,'#92400e'); showMsg('#errBox',res.errors,'#991b1b');
-  if(res.errors && res.errors.length){ $('#stageText').textContent='Blocked by errors'; return; }
-  // Save into state
-  S.employees=res.employees; S.workDays=res.workDays;
-  S.payPeriodStart=res.dates[0]||''; S.payPeriodEnd=res.dates[res.dates.length-1]||'';
-  save();
-  $('#stageText').textContent='Data processed successfully';
-  setTimeout(()=>{ setStep('review'); },400);
-}
-
-/* ===== Review ===== */
-function renderReview(){
-  $('#stat-emps').textContent='Employees: '+S.employees.length;
-  $('#valSummary').innerHTML=`<div class="card"><div class="bd"><b>Tip pools</b>: <span class="badge b-blue">Server keep</span> + <span class="badge" style="background:#dcfce7;color:#166534">Host/Busser</span> + <span class="badge" style="background:#ede9fe;color:#5b21b6">BOH</span>. Match roles to FOH/BOH correctly.</div></div>`;
-  const grid=$('#empGrid'); grid.innerHTML='';
-  for(const emp of S.employees){
-    const el=document.createElement('div'); el.className='card';
-    el.innerHTML=`
-      <div class="bd grid cols-3">
-        <div class="field"><label>Name</label><input value="${escape(emp.name)}" data-k="name"></div>
-        <div class="field"><label>Department</label>
-          <select data-k="department">
-            <option ${emp.department==='FOH'?'selected':''}>FOH</option>
-            <option ${emp.department==='BOH'?'selected':''}>BOH</option>
-          </select>
-        </div>
-        <div class="field"><label>Role</label>
-          <select data-k="role">
-            ${['server','host','busser','expo','cook','meat','prep','cook assist','meat assist','prep assist','dishwasher'].map(r=>`<option ${emp.role===r?'selected':''}>${r}</option>`).join('')}
-          </select>
-        </div>
-      </div>`;
-    el.querySelectorAll('[data-k]').forEach(inp=>{
-      inp.onchange=()=>{
-        emp[inp.dataset.k]=inp.value;
-        if(['server','host','busser','expo'].includes(emp.role)) emp.department='FOH'; else emp.department='BOH';
-        save(); renderReview();
-      };
-    });
-    grid.appendChild(el);
-  }
-  $('#toAttendance').onclick=()=>{
-    calcTips(); // pre-calc to unlock next screen
-    setStep('attendance');
-  };
-}
-
-/* ===== Attendance ===== */
-function renderAttendance(){
-  $('#ppStart').textContent=S.payPeriodStart||'—';
-  $('#ppEnd').textContent=S.payPeriodEnd||'—';
-  // Build unique employee list + date columns
-  const dates=[...new Set(S.workDays.map(w=>w.date))].sort();
-  const byEmp=new Map(); for(const wd of S.workDays){ if(!byEmp.has(wd.employeeId)) byEmp.set(wd.employeeId,{}); byEmp.get(wd.employeeId)[wd.date]=wd; }
-  const table=$('#attTable'); table.innerHTML='';
-  let thead='<tr><th>Employee</th><th>Role</th>'+dates.map(d=>`<th>${d.slice(5)}</th>`).join('')+'</tr>';
-  let rows='';
-  for(const emp of S.employees){
-    const map=byEmp.get(emp.id)||{};
-    rows+='<tr><td>'+escape(emp.name)+'</td><td>'+emp.role+'</td>';
-    for(const d of dates){
-      const wd=map[d]; const on=wd&&wd.worked? 'on':'';
-      rows+=`<td><button class="cell-btn ${on}" data-emp="${emp.id}" data-date="${d}">${on?'✓':''}</button></td>`;
-    }
-    rows+='</tr>';
-  }
-  table.innerHTML=thead+rows;
-  table.querySelectorAll('.cell-btn').forEach(b=>{
-    b.onclick=()=>{
-      const emp=b.dataset.emp, date=b.dataset.date;
-      let rec=S.workDays.find(x=>x.employeeId===emp && x.date===date);
-      if(!rec){ rec={employeeId:emp,date,worked:false}; S.workDays.push(rec); }
-      rec.worked=!rec.worked; b.classList.toggle('on',rec.worked); b.textContent=rec.worked?'✓':'';
-      save();
-    };
-  });
-
-  const totalRows=S.workDays.length;
-  const worked=S.workDays.filter(w=>w.worked).length;
-  $('#stEmp').textContent=S.employees.length;
-  $('#stDays').textContent=worked;
-  $('#stRate').textContent=totalRows? Math.round(100*worked/totalRows)+'%':'0%';
-  $('#stMiss').textContent=0;
-
-  $('#toCalc').onclick=()=>{ calcTips(); setStep('calc'); };
-}
-
-/* ===== Calculation ===== */
-function round2(x){ return Math.round((x||0)*100)/100; }
-
-function calcTips(){
-  const cfg=S.settings;
-  // Build results map per employee
-  const results=new Map();
-  for(const e of S.employees){
-    results.set(e.id,{employeeId:e.id,employeeName:e.name,role:e.role,department:e.department,
-      daysWorked:0, tipAmount:0, originalTips:0, bohContribution:0, hbContribution:0, ccFees:0, baseTips:0,
-      daily:[]});
-  }
-  // Group by date
-  const days={}; for(const wd of S.workDays){ if(!days[wd.date]) days[wd.date]=[]; days[wd.date].push(wd); }
-  const dates=Object.keys(days).sort();
-
-  let totalBoh=0,totalHb=0,totalServer=0,totalBase=0,totalOrig=0,totalCc=0;
-  dates.forEach(date=>{
-    const todays=days[date].filter(d=>d.worked);
-    // Servers present?
-    const serverWD=todays.filter(wd=> (S.employees.find(e=>e.id===wd.employeeId)?.role)==='server');
-    let dailyBohPool=0, dailyHbPool=0;
-    serverWD.forEach(wd=>{
-      const emp=S.employees.find(e=>e.id===wd.employeeId);
-      const tips=round2(wd.individualTips||0);
-      const grat=(cfg.includeGrat==='yes')? round2(wd.gratuity||0):0;
-      const basePre=round2(tips + grat);
-      // Withholding amount (CSV value overrides %)
-      const withheld=round2( (wd.withheldAmt && wd.withheldAmt>0)? wd.withheldAmt : basePre*(cfg.withholdPct||0)/100 );
-      let base=round2(basePre - withheld);
-      const ccBefore= (cfg.ccApply==='before')? round2(base*(cfg.ccPct||0)/100):0;
-      const splitBase=round2(base - ccBefore);
-
-      const boh=round2(splitBase*(cfg.bohPct||0)/100);
-      const hb= (cfg.hbPct||0)==0 ? 0 :
-        (cfg.hbBasis==='postBOH' ? round2((splitBase - boh)*(cfg.hbPct||0)/100) : round2(splitBase*(cfg.hbPct||0)/100));
-      let serverKeep=round2(splitBase - boh - hb);
-      const ccAfter=(cfg.ccApply==='after')? round2(base*(cfg.ccPct||0)/100):0;
-      serverKeep=round2(serverKeep - ccAfter);
-
-      dailyBohPool=round2(dailyBohPool + boh);
-      dailyHbPool=round2(dailyHbPool + hb);
-
-      const r=results.get(emp.id);
-      r.tipAmount=round2(r.tipAmount + serverKeep);
-      r.originalTips=round2(r.originalTips + tips);
-      r.baseTips=round2(r.baseTips + base);
-      r.bohContribution=round2(r.bohContribution + boh);
-      r.hbContribution=round2(r.hbContribution + hb);
-      r.ccFees=round2(r.ccFees + ccBefore + ccAfter);
-      r.daysWorked++;
-      r.daily.push({date,kind:'server',base,tips,grat,withheld,serverKeep,boh,hb,cc:ccBefore+ccAfter});
-    });
-
-    // Distribute BOH pool by tiers among BOH who worked
-    const bohWD=todays.filter(wd=> (S.employees.find(e=>e.id===wd.employeeId)?.department)==='BOH');
-    const leads=bohWD.filter(wd=>['cook','meat','prep'].includes(S.employees.find(e=>e.id===wd.employeeId)?.role));
-    const assists=bohWD.filter(wd=>['cook assist','meat assist','prep assist'].includes(S.employees.find(e=>e.id===wd.employeeId)?.role));
-    const dish=bohWD.filter(wd=> (S.employees.find(e=>e.id===wd.employeeId)?.role)==='dishwasher');
-
-    const leadPool=round2(dailyBohPool*0.50), assistPool=round2(dailyBohPool*0.35), dishPool=round2(dailyBohPool*0.15);
-    if(leads.length){ const per=round2(leadPool/leads.length); leads.forEach(wd=>{ const r=results.get(wd.employeeId); r.tipAmount=round2(r.tipAmount+per); r.daysWorked++; r.daily.push({date,kind:'boh',tier:'Lead',share:per}); }); }
-    if(assists.length){ const per=round2(assistPool/assists.length); assists.forEach(wd=>{ const r=results.get(wd.employeeId); r.tipAmount=round2(r.tipAmount+per); r.daysWorked++; r.daily.push({date,kind:'boh',tier:'Assist',share:per}); }); }
-    if(dish.length){ const per=round2(dishPool/dish.length); dish.forEach(wd=>{ const r=results.get(wd.employeeId); r.tipAmount=round2(r.tipAmount+per); r.daysWorked++; r.daily.push({date,kind:'boh',tier:'Dish',share:per}); }); }
-
-    // Distribute HB pool among hosts + bussers who worked
-    const hbWD=todays.filter(wd=> {
-      const role=S.employees.find(e=>e.id===wd.employeeId)?.role;
-      return role==='host'||role==='busser';
-    });
-    if(hbWD.length){
-      const per=round2(dailyHbPool/hbWD.length);
-      hbWD.forEach(wd=>{ const r=results.get(wd.employeeId); r.tipAmount=round2(r.tipAmount+per); r.daysWorked++; r.daily.push({date,kind:'hb',share:per}); });
-    }
-
-    totalBoh=round2(totalBoh + dailyBohPool);
-    totalHb=round2(totalHb + dailyHbPool);
-  });
-
-  // Totals:
-  for(const r of results.values()){
-    totalServer=round2(totalServer + (r.department==='FOH'? r.tipAmount : 0));
-    totalBase=round2(totalBase + r.baseTips);
-    totalOrig=round2(totalOrig + r.originalTips);
-    totalCc=round2(totalCc + r.ccFees);
-  }
-
-  S.distributions=[...results.values()];
-  S.analytics={totalDistributed: round2(totalServer + totalBoh + totalHb), serverKeeps:totalServer, bohPool:totalBoh, hbPool:totalHb, baseTips:totalBase, originalTips:totalOrig, ccFees:totalCc, employeesPaid:S.distributions.filter(d=>d.tipAmount>0).length };
-  save();
-}
-
-/* ===== Calculator UI ===== */
-function renderCalc(){
-  const cfg=S.settings;
-  // bind inputs
-  $('#setBohPct').value=cfg.bohPct; $('#setHbPct').value=cfg.hbPct; $('#setHbBasis').value=cfg.hbBasis;
-  $('#setCcPct').value=cfg.ccPct; $('#setCcApply').value=cfg.ccApply;
-  $('#setIncludeGrat').value=cfg.includeGrat; $('#setWithholdPct').value=cfg.withholdPct;
-  $('#btnPresetFohBoh').onclick=()=>{ $('#setHbPct').value=0; };
-  $('#btnApply').onclick=()=>{
-    S.settings={
-      bohPct:Number($('#setBohPct').value)||0,
-      hbPct:Number($('#setHbPct').value)||0,
-      hbBasis:$('#setHbBasis').value,
-      ccPct:Number($('#setCcPct').value)||0,
-      ccApply:$('#setCcApply').value,
-      includeGrat:$('#setIncludeGrat').value,
-      withholdPct:Number($('#setWithholdPct').value)||0
-    }; save(); calcTips(); renderCalc();
-  };
-  $('#btnPrintPolicy').onclick=()=>{ window.print(); };
-
-  const b=cfg;
-  $('#badgeRule').textContent=`Rule: BOH ${b.bohPct}% | HB ${b.hbPct}% (${b.hbBasis==='postBOH'?'after BOH':'of base'}) | CC ${b.ccPct}% ${b.ccApply}`;
-
-  // analytics
-  const A=S.analytics||{totalDistributed:0,serverKeeps:0,bohPool:0,hbPool:0,baseTips:0,originalTips:0,ccFees:0,employeesPaid:0};
-  $('#analytics').innerHTML=`
-    <div class="stat"><div class="lbl">Total Distributed</div><div class="val">${money(A.totalDistributed)}</div></div>
-    <div class="stat"><div class="lbl">Server Keeps</div><div class="val">${money(A.serverKeeps)}</div></div>
-    <div class="stat"><div class="lbl">BOH Pool</div><div class="val">${money(A.bohPool)}</div></div>
-    <div class="stat"><div class="lbl">Host/Busser Pool</div><div class="val">${money(A.hbPool)}</div></div>
-    <div class="stat"><div class="lbl">Total Tip Base (tips + grat − w/h)</div><div class="val">${money(A.baseTips)}</div></div>
-    <div class="stat"><div class="lbl">Original Tips</div><div class="val">${money(A.originalTips)}</div></div>
-    <div class="stat"><div class="lbl">CC Fees Total</div><div class="val">${money(A.ccFees)}</div></div>
-    <div class="stat"><div class="lbl">Employees Paid</div><div class="val">${A.employeesPaid}</div></div>
-  `;
-
-  // tabs
-  $$('#tabs-scope .tab').forEach(t=>t.classList.toggle('active',t.dataset.view===S.ui.view));
-  $$('#tabs-scope .tab').forEach(t=>t.onclick=()=>{ S.ui.view=t.dataset.view; save(); showTables(); });
-
-  $('#btnExport').onclick=()=>exportCurrentView();
-  $('#btnPrintFoh').onclick=()=>printView('foh');
-  $('#btnPrintBoh').onclick=()=>printView('boh');
-  $('#btnPrintAll').onclick=()=>printView('all');
-  $('#btnArchive').onclick=saveArchive;
-
-  showTables();
-}
-
-function showTables(){
-  const view=S.ui.view||'foh';
-  $('#tblFOH').classList.toggle('hidden',view!=='foh');
-  $('#tblBOH').classList.toggle('hidden',view!=='boh');
-  $('#tblALL').classList.toggle('hidden',view!=='all');
-  const data=S.distributions||[];
-  const FOH=data.filter(d=>d.department==='FOH');
-  const BOH=data.filter(d=>d.department==='BOH');
-  renderTable('#tblFOH', FOH);
-  renderTable('#tblBOH', BOH);
-  renderTable('#tblALL', data);
-}
-
-function renderTable(sel,rows){
-  const tbl=$(sel);
-  tbl.innerHTML=`
-    <tr>
-      <th>Employee Name</th><th>Role</th><th>Days</th>
-      <th>Tip Amount ▾</th><th>Base Tips</th>
-      <th>Original Tips</th><th>BOH Contrib</th><th>HB Contrib</th><th>CC Fees</th>
-    </tr>
-    ${rows.map(r=>`
-      <tr data-id="${r.employeeId}" class="r">
-        <td>${escape(r.employeeName)}</td>
-        <td><span class="pill">${r.role}</span></td>
-        <td>${r.daysWorked||0}</td>
-        <td>${money(r.tipAmount)}</td>
-        <td>${r.baseTips?money(r.baseTips):'N/A'}</td>
-        <td>${r.originalTips?money(r.originalTips):'N/A'}</td>
-        <td>${r.bohContribution?money(r.bohContribution):'N/A'}</td>
-        <td>${r.hbContribution?money(r.hbContribution):'N/A'}</td>
-        <td>${r.ccFees?money(r.ccFees):'$0.00'}</td>
-      </tr>
-      <tr class="hidden" id="d_${r.employeeId}"><td colspan="9">${renderDetail(r)}</td></tr>
-    `).join('')}
-  `;
-  tbl.querySelectorAll('tr.r').forEach(tr=>{
-    tr.onclick=()=>{
-      const id=tr.dataset.id;
-      $('#d_'+id)?.classList.toggle('hidden');
-    };
-  });
-}
-function renderDetail(r){
-  const lines=r.daily||[];
-  if(r.role==='server'){
-    return `<div class="grid cols-1">
-      <table>
-        <tr><th>Date</th><th>Base</th><th>Server Keeps</th><th>BOH</th><th>HB</th><th>CC</th><th>Tips</th><th>Gratuity</th><th>Withheld</th></tr>
-        ${lines.filter(x=>x.kind==='server').map(x=>`<tr><td>${x.date}</td><td>${money(x.base)}</td><td>${money(x.serverKeep)}</td><td>${money(x.boh)}</td><td>${money(x.hb)}</td><td>${money(x.cc)}</td><td>${money(x.tips)}</td><td>${money(x.grat||0)}</td><td>${money(x.withheld||0)}</td></tr>`).join('')}
-      </table>
-    </div>`;
-  }
-  if(r.department==='BOH'){
-    return `<table><tr><th>Date</th><th>Tier</th><th>Share</th></tr>
-      ${lines.filter(x=>x.kind==='boh').map(x=>`<tr><td>${x.date}</td><td>${x.tier}</td><td>${money(x.share)}</td></tr>`).join('')}
-    </table>`;
-  }
-  // HB
-  return `<table><tr><th>Date</th><th>HB Share</th></tr>
-    ${lines.filter(x=>x.kind==='hb').map(x=>`<tr><td>${x.date}</td><td>${money(x.share)}</td></tr>`).join('')}
-  </table>`;
-}
-
-/* ===== Exports / Print / Archive ===== */
-function exportCurrentView(){
-  const view=S.ui.view;
-  const rows=(view==='foh')? S.distributions.filter(x=>x.department==='FOH')
-           : (view==='boh')? S.distributions.filter(x=>x.department==='BOH')
-           : S.distributions;
-  const head=['Employee Name','Role','Days Worked','Tip Amount','Base Tips','Original Tips','BOH Contribution','HB Contribution','CC Fees'];
-  const csv=[head.join(',')].concat(rows.map(r=>[
-    `"${r.employeeName.replace(/"/g,'""')}"`, r.role, r.daysWorked, r.tipAmount.toFixed(2),
-    r.baseTips?r.baseTips.toFixed(2):'', r.originalTips?r.originalTips.toFixed(2):'',
-    r.bohContribution?r.bohContribution.toFixed(2):'', r.hbContribution?r.hbContribution.toFixed(2):'',
-    r.ccFees?r.ccFees.toFixed(2):'0.00'
-  ].join(','))).join('\n');
-  downloadFile(`tip-distribution-${S.payPeriodStart||'start'}-${S.payPeriodEnd||'end'}-${view}.csv`, csv);
-}
-function printView(view){
-  const data=(view==='foh')? S.distributions.filter(x=>x.department==='FOH')
-           : (view==='boh')? S.distributions.filter(x=>x.department==='BOH')
-           : S.distributions;
-  const area=$('#printArea'); area.innerHTML='';
-  const card=document.createElement('div'); card.className='card';
-  const title=`Mukja Tip Report — ${view.toUpperCase()} — ${S.payPeriodStart} → ${S.payPeriodEnd}`;
-  card.innerHTML=`<div class="hd"><h2>${title}</h2></div>
-  <div class="bd"><table>
-    <tr><th>Employee</th><th>Role</th><th>Days</th><th>Tip Amount</th><th>Base</th><th>Orig</th><th>BOH Contrib</th><th>HB Contrib</th></tr>
-    ${data.map(r=>`<tr><td>${escape(r.employeeName)}</td><td>${r.role}</td><td>${r.daysWorked}</td><td>${money(r.tipAmount)}</td><td>${r.baseTips?money(r.baseTips):''}</td><td>${r.originalTips?money(r.originalTips):''}</td><td>${r.bohContribution?money(r.bohContribution):''}</td><td>${r.hbContribution?money(r.hbContribution):''}</td></tr>`).join('')}
-  </table></div>`;
-  area.appendChild(card);
-  area.classList.remove('hidden');
-  window.print();
-  area.classList.add('hidden');
-}
-function saveArchive(){
-  const snap={ when:new Date().toISOString(), start:S.payPeriodStart, end:S.payPeriodEnd, settings:S.settings, analytics:S.analytics, distributions:S.distributions };
-  const arr=getArchives(); arr.unshift(snap); putArchives(arr);
-  alert('Saved to archive.');
-}
-function renderArchives(){
-  const arr=getArchives();
-  const tbl=$('#tblArchives');
-  if(!arr.length){ tbl.innerHTML='<tr><td>No archives yet.</td></tr>'; return; }
-  tbl.innerHTML='<tr><th>When</th><th>Period</th><th>Total Distributed</th><th>Employees</th><th></th></tr>'+
-    arr.map((a,i)=>`<tr><td>${a.when.slice(0,19).replace('T',' ')}</td><td>${a.start} → ${a.end}</td><td>${money(a.analytics?.totalDistributed||0)}</td><td>${a.analytics?.employeesPaid||0}</td><td><button class="btn gray" data-i="${i}">Load</button></td></tr>`).join('');
-  tbl.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>{
-    const a=arr[+b.dataset.i];
-    S.settings=a.settings; S.analytics=a.analytics; S.distributions=a.distributions;
-    S.payPeriodStart=a.start; S.payPeriodEnd=a.end;
-    save(); setStep('calc');
-  });
-}
-
-/* ===== Helpers ===== */
-function downloadFile(name,content){
-  const a=document.createElement('a'); a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(content); a.download=name; a.click();
-}
-
-/* ===== Reset ===== */
-$('#btnResetAll').onclick=()=>{ if(confirm('Start Over? This clears the current run (archives remain).')){ localStorage.removeItem(STATE_KEY); S=JSON.parse(localStorage.getItem(STATE_KEY)||'null') || {step:'upload',employees:[],workDays:[],payPeriodStart:'',payPeriodEnd:'',distributions:[],settings:{bohPct:30,hbPct:10,hbBasis:'original',ccPct:0,ccApply:'after',includeGrat:'yes',withholdPct:3},ui:{view:'foh'}}; setStep('upload'); } };
-
-/* ===== Init ===== */
-setStep(S.step||'upload');
-if(S.distributions?.length && S.step==='calc'){ renderCalc(); }
+/*** INIT ***/
+load();recalc();
 </script>
 </body>
 </html>
